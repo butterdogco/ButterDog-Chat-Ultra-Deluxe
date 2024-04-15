@@ -2,11 +2,13 @@
 <html>
 
 <head>
-  <title>ButterDog Chat Ultra Deluxe</title>
+  <title>ButterDog Chat Ultra Deluxe Premium Platinum Edition Pro Max Plus</title>
   <link rel="shortcut icon"
     href="https://raw.githubusercontent.com/butterdogco/butterdogco.github.io/main/img/favicon.ico">
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <style>
     @keyframes messageAdd {
       0% {
@@ -68,40 +70,67 @@
       background: var(--color3);
       overflow-x: hidden;
       overflow-y: scroll;
-    }
 
-    #sidebar #onlineCount {
-      text-align: center;
-    }
+      #onlineCount {
+        text-align: center;
+      }
 
-    #sidebar div#activeUsers {
-      list-style-type: none;
-      text-align: center;
-      list-style-position: inside;
-      overflow-wrap: break-word;
-    }
+      div#activeUsers {
+        overflow-wrap: break-word;
+        width: 100%;
+        
+        div#user {
+          width: 100%;
+          height: 50px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          overflow: hidden;
+          transition: 0.2s ease;
 
-    #sidebar #activeUsers p {
-      margin: 0;
-    }
+          p#username {
+            display: inline;
+            height: 100%;
+            margin-left: 10px;
+            position: relative;
+            bottom: 50%;
+            transform: translateY(-50%);
+          }
 
-    #sidebar button#profileDialogButton {
-      width: 90%;
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--color2);
-      font-size: 20px;
-      border-radius: 4vh;
-      padding: 12px;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
+          img#avatar {
+            object-fit: contain;
+            display: inline;
+            height: 50px;
+            width: 50px;
+            overflow: hidden;
+            margin-left: 5px;
+            border-radius: 50%;
+            background: var(--color3);
+          }
+        }
 
-    #sidebar button#profileDialogButton:hover {
-      background: var(--color1);
+        div#user:hover {
+          background: var(--color4);
+        }
+      } 
+
+      button#profileDialogButton {
+        width: 90%;
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color2);
+        font-size: 20px;
+        border-radius: 4vh;
+        padding: 12px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button#profileDialogButton:hover {
+        background: var(--color1);
+      }
     }
 
     #form {
@@ -304,19 +333,22 @@
       z-index: 4;
       overflow: hidden;
 
-      button#closeButton {
-        background: none;
+      button#profileCloseButton {
+        background: var(--color4);
         border: none;
         padding: 12px;
         font-weight: bold;
         position: absolute;
-        right: 5px;
-        top: 5px;
+        right: 7px;
+        top: 7px;
+        font-size: 18px;
+        border-radius: 50%;
         cursor: pointer;
         transform: 0.2s ease;
+        aspect-ratio: 1/1;
       }
 
-      button#closeButton:hover {
+      button#profileCloseButton:hover {
         background: var(--color2);
       }
 
@@ -374,9 +406,22 @@
       }
     }
 
-    /* #messages>li:nth-child(odd) {
-      background: #efefef;
-    } */
+    @media (max-width: 1000px) {
+      #messages {
+        width: 100vw;
+        margin-left: 0;
+        transform: translateX(3%);
+      }
+      #sidebar {
+        transform: translateX(-97%);
+        width: 90vw;
+        transition: 0.3s ease;
+        z-index: 2;
+      }
+      #sidebar:hover {
+        transform: translateX(0);
+      }
+    }
   </style>
 </head>
 
@@ -384,9 +429,9 @@
   <div id="chatOverlay" style="display: none;"></div>
   <div id="sidebar">
     <h2 id="onlineCount">Online</h2>
-    <ul id="activeUsers">
+    <div id="activeUsers">
 
-    </ul>
+    </div>
     <button id="profileDialogButton">Edit Profile</button>
   </div>
 
@@ -402,7 +447,7 @@
   </div>
 
   <div id="profileDialog" style="display: none;">
-    <button id="closeButton">X</button>
+    <button id="profileCloseButton" style="display: none;">X</button>
     <h2>Your Profile</h2>
     <p id="avatarLabel">Avatar</p>
     <img id="avatarIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAQFJREFUaEPtmFEKhDAMRNv7H7qLC4II2sR5bsky/krjvEyStvZW/OnF9TcDrHbQDvydA2OMcQfVe0ddR4PNxO9gJAQCEBV+doYAMcDT7FPlJDmgiicgDEDsA0oz2wE70FpzCSlloI5SJfubbqmJtwDlARQINfuIA3v5ZZ0gxKMAGSco8TjAcRicHSFFH78jN7EywYi1BijdxNnJc1UySn+kS4gSTcGEAd4W/vTCHwL4tfjMVXMKsEp8FOIWYLX4CIQBiN10FuNuzJZw4Htou/gpbICZ/dT70g6U74HHAJlbFlUq2SPFdCdeCRE5pYYA3souEdcARBaVGHZAyR6xtrwDH8Z8iDGmwhl9AAAAAElFTkSuQmCC">
@@ -449,6 +494,7 @@
     var profileAvatarImg = document.getElementById('avatarIcon');
     var profileUsernameLabel = document.getElementById('usernameLabel');
     var editProfileButton = document.getElementById('profileDialogButton');
+    var profileCloseButton = document.getElementById('profileCloseButton');
     var accountSetup = false;
 
     if (localStorage.getItem("username")) {
@@ -504,18 +550,22 @@
           socket.emit('changeUsername', user);
           username = profileUsernameInput.value;
         }
-        alert(localStorage.getItem('avatar'))
-        if (localStorage.getItem('avatar') != profileAvatarInput.value) {
+        if (localStorage.getItem('avatar') != profileAvatarImg.src) {
           socket.emit('changeAvatar', profileAvatarImg.src);
         }
       } else {
         username = profileUsernameInput.value;
         socket.emit('login', user);
         socket.emit('changeAvatar', profileAvatarImg.src);
+        profileCloseButton.style.display = 'block';
       }
       localStorage.setItem("username", username);
       localStorage.setItem("avatar", profileAvatarImg.src);
     }
+
+    profileCloseButton.addEventListener('click', (e) => {
+      toggleProfileDialog();
+    });
 
     profileAvatarInput.addEventListener('change', (e) => {
       previewProfileImage(e);
@@ -705,12 +755,20 @@
         createSystemMessage("<strong>" + username + "</strong> has left the chat.", time);
         window.scrollTo(0, document.body.scrollHeight);
       });
-      socket.on('online', function (users) {
+      socket.on('online', function (users, avatars) {
         onlineCount.innerHTML = `Online (${users.length})`;
         activeUsers.innerHTML = "";
         users.forEach(user => {
-          var item = document.createElement('p');
-          item.innerText = user;
+          var item = document.createElement('div');
+          var username = document.createElement('p');
+          var avatar = document.createElement('img');
+          item.id = 'user';
+          username.innerText = user;
+          username.id = 'username';
+          avatar.src = avatars[user];
+          avatar.id = 'avatar';
+          item.appendChild(avatar);
+          item.appendChild(username);
           activeUsers.appendChild(item);
         });
       });

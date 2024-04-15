@@ -42,7 +42,7 @@ async function changeUsername(username, id) {
     delete avatars[users[id]];
     usernames[usernames.indexOf(users[id])] = username;
     users[id] = username;
-    io.emit('online', usernames);
+    io.emit('online', usernames, avatars);
   }
 }
 
@@ -59,7 +59,7 @@ io.on('connection', async (socket) => {
         users[socket.id] = username;
         usernames.push(username);
         io.to('main').emit('user joined', username, new Date());
-        io.emit('online', usernames);
+        io.emit('online', usernames, avatars);
     });
 
     socket.on('disconnect', function(){
@@ -67,11 +67,12 @@ io.on('connection', async (socket) => {
         usernames.splice(usernames.indexOf(users[socket.id]), usernames.indexOf(users[socket.id]) + 1);
         delete users[socket.id];
         delete avatars[users[socket.id]];
-        io.emit('online', usernames);
+        io.emit('online', usernames, avatars);
     });
 
     socket.on('changeAvatar', function(base64){
         avatars[users[socket.id]] = base64;
+        io.emit('online', usernames, avatars);
         io.emit('avatarChanged', base64, users[socket.id]);
     });
 
