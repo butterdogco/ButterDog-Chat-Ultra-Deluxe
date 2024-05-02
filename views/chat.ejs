@@ -7,6 +7,7 @@
     href="https://raw.githubusercontent.com/butterdogco/butterdogco.github.io/main/img/favicon.ico">
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,200" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <style>
@@ -180,19 +181,31 @@
           }
 
           button#DMbutton {
-            width: 70px;
             float: right;
-            position: absolute;
-            right: 0;
+            position: relative;
+            right: 10px;
             background: rgba(0, 0, 0, 0);
-            border-radius: 8px;
+            border-radius: 50%;
             cursor: pointer;
             transition: 0.2s ease;
             border: none;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 40px;
+            padding: 5px;
           }
 
           button#DMbutton:hover {
             background: var(--color3);
+          }
+
+          button#DMbutton span {
+            transform: translate(-50%, -50%);
+            position: relative;
+            margin-top: 65%;
+            margin-left: 50%;
+            height: 30px;
           }
         }
 
@@ -924,14 +937,28 @@
       }
 
       function getDM(user, message, avatar, time) {
-        createDM(user);
-        var div = document.getElementById(user + "-DMs");
-        createMessage(div, user, message, avatar, time);
-        createNotification(user, message);
+        // If it is not from me
+        if (profileUsernameInput.value !== user) {
+          createDM(user);
+          var div = document.getElementById(user + "-DMs");
+          createMessage(div, user, message, avatar, time);
+        } else {
+          var div = document.getElementById(openChat + "-DMs");
+          createMessage(div, user, message, avatar, time);
+        }
+
+        // If the chat is open
+        if (openChat === user) {
+          window.scrollTo(0, document.body.scrollHeight);
+        } else {
+          createNotification(user, message);
+        }
       }
 
       function sendDM(user, message) {
         socket.emit('DM', user, message);
+        var div = document.getElementById(user + "-DMs");
+        createMessage(div, profileUsernameInput.value, message, avatar, new Date());
       }
 
       function openDM(user) {
@@ -1077,11 +1104,15 @@
 
           if (user !== profileUsernameInput.value) {
             var dmButton = document.createElement('button');
-            dmButton.innerText = 'Message';
+            var icon = document.createElement('span');
+            // dmButton.innerText = 'Message';
             dmButton.id = 'DMbutton';
             dmButton.onclick = function() {
               openDM(user);              
             }
+            icon.innerHTML = "forum";
+            icon.className = "material-symbols-rounded";
+            dmButton.appendChild(icon);
             item.appendChild(dmButton);
           }
         });
