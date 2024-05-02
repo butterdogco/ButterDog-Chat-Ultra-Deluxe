@@ -1037,12 +1037,6 @@
         sendImage(imagePreview.src);
       });
 
-      function ping() {
-        socket.emit('ping');
-        setTimeout(ping, 5000, username);
-      }
-      // ping();
-
       // Socket Functions
       socket.on('getDM', function(user, message, avatar, time) {
         getDM(user, message, avatar, time);
