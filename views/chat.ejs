@@ -627,21 +627,6 @@
     var socket = io();
     var username = null;
     var avatarBase64 = null;
-    // function askUsername(text) {
-    //   var askUser = prompt(text);
-    //   if (askUser === "" || askUser === " ") {
-    //     askUser = "User" + (Math.floor(Math.random() * 90000) + 10000);
-    //   }
-    //   username = askUser.toString(); 
-    //   socket.emit('usernameTaken', username, (response) => {
-    //     if (response === true) {
-    //       askUsername("That username is taken! Try another.");
-    //     } else {
-    //       ready();
-    //     }
-    //   });
-    // }
-    // askUsername("What do you want to use as a username?");
 
     var profileDialog = document.getElementById('profileDialog');
     var profileSaveButton = document.getElementById('profileSaveButton');
