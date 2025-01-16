@@ -1,8 +1,8 @@
-import express from 'express';
+const express = require('express');
 const app = express();
-import { createServer } from 'http';
-const server = createServer(app);
-import { Server } from "socket.io";
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 const io = new Server(server, {
   connectionStateRecovery: {}
 });
