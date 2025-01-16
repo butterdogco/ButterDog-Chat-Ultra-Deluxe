@@ -1,14 +1,12 @@
-const express = require('express');
+import express from 'express';
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
+import { createServer } from 'http';
+const server = createServer(app);
+import { Server } from "socket.io";
 const io = new Server(server, {
   connectionStateRecovery: {}
 });
-const fs = require("node:fs/promises");
-const { localsName } = require('ejs');
-const { callbackify } = require('util');
+const PORT = 8080;
 app.set("view engine", "ejs");
 
 app.get('/', (req, res) => {
@@ -26,8 +24,6 @@ const replacements = {
   ["truck"]: "2024 F-150® XL starting at $36,770",
   ["died"]: "had a skill issue",
   ["mountainside"]: "mountainside (mid)",
-  ["as"]: "ass",
-  ["loved"]: "loved ❤",
 };
 
 var users = {};
@@ -175,6 +171,6 @@ io.on('connection', async (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log('Server started! Listening on port 3000.');
+server.listen(PORT, () => {
+  console.log(`Server started! Listening on port ${PORT}.`);
 });
