@@ -268,25 +268,9 @@ function main() {
     socket.on('avatarRequest', function () {
         socket.emit('avatarChanged', profileAvatarImg.src);
     });
-    // socket.on('usernameChanged', function (oldUser, newUser, date) {
-    //     createMessage(messages, `<b>${oldUser}</b> has changed their username to <b>${newUser}</b>.`, date);
-    // });
-    // socket.on('avatarChanged', function (base64, user, date) {
-    //     createSystemMessage(messages, `<b>${user}</b> has changed their avatar.`, date);
-    // });
     socket.on('chatMessage', function (messageInfo) {
+        alert(JSON.stringify(messageInfo));
         createMessage(messages, messageInfo);
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-    socket.on('chatImage', function (user, img, avatar, time) {
-        // createImageMessage(messages, user, img, avatar, time);
-    });
-    socket.on('userJoined', function (username, time) {
-        // createSystemMessage(messages, "<strong>" + username + "</strong> joined the chat!", time);
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-    socket.on('userLeft', function (username, time) {
-        // createSystemMessage(messages, "<strong>" + username + "</strong> has left the chat.", time);
         window.scrollTo(0, document.body.scrollHeight);
     });
     socket.on('online', function (users, avatars) {

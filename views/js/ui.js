@@ -1,5 +1,4 @@
 function createMessage(div, messageInfo) {
-    console.log(messageInfo);
     // Create the main element
     const time = new Date(messageInfo.Date).toLocaleTimeString([], {
         hour: "2-digit",
@@ -16,7 +15,7 @@ function createMessage(div, messageInfo) {
         const topSpan = document.createElement("span");
         const username = document.createElement("p");
         username.classList.add("username");
-        username.innerText = messageInfo.User || "User";
+        username.innerText = messageInfo.Username || "User";
         const sendTime = document.createElement("p");
         sendTime.classList.add("sendTime");
         sendTime.innerText = time || "00:00";

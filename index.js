@@ -12,18 +12,21 @@ app.set("view engine", "ejs");
 app.use(express.static("views"));
 app.get("/", (req, res) => res.render("chat"));
 
+
+let accounts = require("./data/accounts.json");
 const userUploadsDirectory = "userUploads";
+const defaultAvatar = `${userUploadsDirectory}/avatars/default.png`;
+const defaultAttachment = `${userUploadsDirectory}/attachments/default.png`;
 const replacements = {
-  cute: "cute 🥵❤🍆🍑🔥",
+  "cute": "cute 🥵❤🍆🍑🔥",
   "markus walker": "markus runner",
   "my mom": "my mom 🥵",
   "your mom": "mom mom 🥵",
-  "you're": "you'r're are",
-  cat: "pussy",
+  "cat": "pussy",
   "female dog": "bitch",
-  truck: "2024 F-150® XL starting at $36,770",
-  died: "had a skill issue",
-  mountainside: "mountainside (better)",
+  "truck": "2024 F-150® XL starting at $36,770",
+  "died": "had a skill issue",
+  "mountainside": "mountainside (better)",
 };
 
 const users = {};
@@ -33,13 +36,26 @@ const pings = {};
 const sockets = {};
 let checking = false;
 
+function createAccount(info) {
+  const account = {
+    ID: crypto.randomUUID(),
+    Username: info.Username,
+    Password: info.Password,
+    Avatar: info.Avatar
+  };
+
+  accounts.push(accounts.push(account));
+  return account;
+}
+
 function checkOffline() {
   try {
     checking = true;
     Object.entries(pings).forEach(([id, ping]) => {
+      console.log(id);
       if (ping < 1) {
         const username = users[id];
-        io.to("main").emit("user left", username, new Date());
+        // io.to("main").emit("user left", username, new Date());
         usernames.splice(usernames.indexOf(username), 1);
         delete users[id];
         delete avatars[id];
@@ -196,7 +212,6 @@ async function login(info, callback, socket) {
     sockets[username] = socket.id;
     avatars[users[socket.id]] = avatarURL;
     usernames.push(username);
-    io.emit("online", usernames, avatars);
     if (!silent) {
       io.to("main").emit("message", {
         Username: username,
@@ -209,6 +224,7 @@ async function login(info, callback, socket) {
       Username: username,
       Avatar: avatarURL,
     });
+    io.emit("online", usernames, avatars);
   } else {
     callback({
       Success: false,
@@ -259,7 +275,8 @@ io.on("connection", (socket) => {
     if (!isUsernameTaken(info.User)) {
       users[socket.id] = info.User;
       usernames.push(info.User);
-      // io.to("main").emit("user joined", info.User, new Date());
+      console.log(usernames);
+      console.log(avatars);
       io.emit("online", usernames, avatars);
     }
 
@@ -274,7 +291,7 @@ io.on("connection", (socket) => {
     const messageInfo = {
       Username: info.Username || "Username",
       Content: info.Content,
-      Avatar: avatar,
+      Avatar: avatar || defaultAvatar,
       Channel: info.Channel || "main",
       Date: new Date(),
     };

@@ -75,6 +75,7 @@ const previewProfileImage = async (event) => {
 };
 
 const login = async (username, avatar, silent) => {
+    main();
     return new Promise((resolve, reject) => {
         socket.emit(
             "login",
@@ -104,13 +105,14 @@ const saveProfile = async () => {
 
             if (!accountSetup) {
                 toggleProfileDialog();
-                main();
+                // main();
             }
         } else {
             elements.Profile.UsernameLabel.textContent = response.Error;
         }
     } catch (error) {
         console.warn(error);
+        alert(error);
         elements.Profile.UsernameLabel.textContent = error.Error || "Login failed";
     }
 };
