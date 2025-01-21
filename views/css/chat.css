@@ -40,22 +40,38 @@
       opacity: 1;
     }
   }
+/*
+  Color 1 = Button hover highlight
+  Color 2 = chat background, bottom bar bg
+  Color 3 = prompt button backgrounds, side bar bg, message hover color
+  Color 4 = Text box buttons, prompt bgs
 
+  color1trans = 
+  color2trans = 
+  color3trans = reported notif border
+  color4trans = reported notif bg
+
+  textcolor1 = main, prompt, sidebar, bottom bar, icons
+  textcolor2 = report button hover, 
+  textcolor3 = 
+  textcolor4 = secondary, time, report
+
+*/
   :root {
-    --color1: rgba(209, 209, 209, 0.163);
-    --color2: rgb(8, 9, 21);
-    --color3: rgb(23, 23, 52);
-    --color4: rgb(48, 48, 96);
+    --color1: rgb(0, 0, 0, 0.163);
+    --color2: rgb(0, 15, 51);
+    --color3: rgb(12, 46, 90);
+    --color4: rgb(4, 49, 98);
 
-    --color1trans: rgba(16, 17, 36, 0.6);
-    --color2trans: rgba(8, 9, 21, 0.6);
-    --color3trans: rgba(23, 23, 52, 0.6);
-    --color4trans: rgba(48, 48, 96, 0.6);
+    --color1trans: rgb(255, 0, 0, 0.6);
+    --color2trans: rgb(0, 255, 98, 0.6);
+    --color3trans: rgb(5, 33, 51, 0.6);
+    --color4trans: rgb(11, 60, 91, 0.6);
 
     --textcolor1: rgb(255, 255, 255);
-    --textcolor2: rgb(205, 204, 204);
-    --textcolor3: rgba(196, 196, 196, 0.719);
-    --textcolor4: rgba(196, 196, 196, 0.301);
+    --textcolor2: rgb(124, 165, 203);
+    --textcolor3: rgb(17, 0, 255, 0.719);
+    --textcolor4: rgb(184, 205, 255, 0.5);
 
     --linktextcolor1: rgb(90, 214, 222);
     --linktextcolor2: rgb(80, 183, 191);
@@ -518,7 +534,7 @@
       background-color: var(--color1);
     }
 
-    input#usernameInput {
+    input[type="text"] {
       border-radius: 4vh;
       width: 90%;
       padding: 12px;
@@ -549,6 +565,10 @@
     button#profileSaveButton:hover {
       background: var(--color1);
     }
+  }
+
+  div#profileDialog.hidden {
+    display: none;
   }
 
   div#enlargedImage {

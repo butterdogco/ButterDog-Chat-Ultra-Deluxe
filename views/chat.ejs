@@ -37,16 +37,16 @@
     <button id="submitImageButton">Send</button>
   </div>
 
-  <div id="profileDialog" style="display: none;">
+  <div id="profileDialog" class="hidden">
     <button id="profileCloseButton" style="display: none;">X</button>
-    <h2>Your Profile</h2>
-    <p id="avatarLabel">Avatar</p>
-    <img id="avatarIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAQFJREFUaEPtmFEKhDAMRNv7H7qLC4II2sR5bsky/krjvEyStvZW/OnF9TcDrHbQDvydA2OMcQfVe0ddR4PNxO9gJAQCEBV+doYAMcDT7FPlJDmgiicgDEDsA0oz2wE70FpzCSlloI5SJfubbqmJtwDlARQINfuIA3v5ZZ0gxKMAGSco8TjAcRicHSFFH78jN7EywYi1BijdxNnJc1UySn+kS4gSTcGEAd4W/vTCHwL4tfjMVXMKsEp8FOIWYLX4CIQBiN10FuNuzJZw4Htou/gpbICZ/dT70g6U74HHAJlbFlUq2SPFdCdeCRE5pYYA3souEdcARBaVGHZAyR6xtrwDH8Z8iDGmwhl9AAAAAElFTkSuQmCC">
+    <h2 id="profileHeaderLabel">Your Profile</h2>
+    <p>Avatar</p>
+    <img id="profileAvatarImg" src="userUploads/avatars/default.png">
     <br>
-    <input id="avatarUploadInput" type="file" accept=".png,.jpeg,.jpg,.webp,.tiff,.gif">
+    <input id="profileAvatarInput" type="file" accept=".png,.jpeg,.jpg,.webp,.tiff,.gif">
 
-    <p id="usernameLabel">Username</p>
-    <input id="usernameInput" type="text" maxlength="24" placeholder="Enter a username">
+    <p id="profileUsernameLabel">Username</p>
+    <input id="profileUsernameInput" type="text" maxlength="24" placeholder="Enter a username">
     <button id="profileSaveButton">Save</button>
   </div>
 
@@ -62,7 +62,9 @@
     <button id="messageSend">Send</button>
   </form>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/chat.js"></script>
+  <script defer src="js/chat.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="js/profile.js"></script>
 </body>
 
 </html>

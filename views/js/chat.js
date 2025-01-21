@@ -1,152 +1,4 @@
 var socket = io();
-var username = null;
-var avatarBase64 = null;
-
-let elements = {
-    Profile: {
-        Dialog: document.getElementById("profileDialog"),
-        SaveButton: document.getElementById("profileSaveButton"),
-        UsernameInput: document.getElementById("profileUsernameInput"),
-        
-    },
-}
-
-var profileDialog = document.getElementById('profileDialog');
-var profileSaveButton = document.getElementById('profileSaveButton');
-var profileUsernameInput = document.getElementById('usernameInput');
-var profileAvatarInput = document.getElementById('avatarUploadInput');
-var profileAvatarImg = document.getElementById('avatarIcon');
-var profileUsernameLabel = document.getElementById('usernameLabel');
-var editProfileButton = document.getElementById('profileDialogButton');
-var profileCloseButton = document.getElementById('profileCloseButton');
-var accountSetup = false;
-var profileDialogOpen = false;
-var uploadDialogOpen = false;
-var enlargedImageOpen = false;
-
-if (localStorage.getItem("username")) {
-    profileUsernameInput.value = localStorage.getItem("username");
-}
-if (localStorage.getItem("avatar")) {
-    profileAvatarImg.src = localStorage.getItem("avatar");
-}
-
-const convertBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const fileReader = new FileReader();
-        fileReader.readAsDataURL(file);
-
-        fileReader.onload = () => {
-            resolve(fileReader.result);
-        };
-
-        fileReader.onerror = (error) => {
-            reject(error);
-        };
-    });
-};
-
-function truncateText(text, maxLength) {
-    var element = text;
-
-    if (element.length > maxLength) {
-        element = element.substr(0, maxLength) + '...';
-    }
-    return element;
-}
-
-function setOverlay(val) {
-    var overlay = document.getElementById('chatOverlay');
-    if (val === true) {
-        overlay.style.display = 'block';
-    } else {
-        overlay.style.display = 'none';
-    }
-}
-
-function toggleProfileDialog() {
-    if (profileDialog.style.display === 'none') {
-        setOverlay(true);
-        profileDialog.style.display = 'block';
-        profileDialogOpen = true;
-    } else {
-        setOverlay(false);
-        profileDialog.style.display = 'none';
-        profileDialogOpen = false;
-    }
-}
-
-async function previewProfileImage(event) {
-    const file = event.target.files[0];
-    if (file.size < 800000) {
-        profileAvatarImg.src = await convertBase64(file);
-        avatarBase64 = await convertBase64(file);
-    } else {
-        alert("That image is too large! It must be less than 1MB.");
-        profileAvatarInput.value = "";
-    }
-}
-
-function saveProfile(user) {
-    if (accountSetup === true) {
-        if (localStorage.getItem('username') != user) {
-            socket.emit('changeUsername', user);
-        }
-        if (localStorage.getItem('avatar') != profileAvatarImg.src) {
-            socket.emit('changeAvatar', profileAvatarImg.src);
-        }
-    } else {
-        socket.emit('login', user);
-        socket.emit('changeAvatar', profileAvatarImg.src);
-        profileCloseButton.style.display = 'block';
-    }
-    localStorage.setItem("username", user);
-    localStorage.setItem("avatar", profileAvatarImg.src);
-}
-
-profileCloseButton.addEventListener('click', (e) => {
-    toggleProfileDialog();
-});
-
-profileAvatarInput.addEventListener('change', (e) => {
-    previewProfileImage(e);
-});
-
-profileSaveButton.addEventListener('click', function () {
-    socket.emit('usernameTaken', profileUsernameInput.value, (response) => {
-        if (response === true && username != profileUsernameInput.value) {
-            profileUsernameLabel.innerText = "Username in-use! Try another.";
-            setTimeout(function () {
-                profileUsernameLabel.innerText = "Username";
-            }, 3000);
-        } else {
-            toggleProfileDialog();
-            if (accountSetup === false) {
-                username = profileUsernameInput.value.replace(/ /g, "");
-                username = profileUsernameInput.value.replace("⠀", "");
-                if (username === null || username === "") {
-                    username = "User" + (Math.floor(Math.random() * 90000) + 10000);
-                }
-                saveProfile(username);
-                accountSetup = true;
-                main();
-            } else {
-                var usertemp = profileUsernameInput.value.replace(/ /g, "");
-                if (usertemp === null || usertemp === "") {
-                    usertemp = "User" + (Math.floor(Math.random() * 90000) + 10000);
-                }
-                username = usertemp;
-                saveProfile(usertemp);
-            }
-        }
-    })
-});
-
-editProfileButton.addEventListener('click', function () {
-    toggleProfileDialog();
-});
-
-toggleProfileDialog();
 
 function main() {
     // Variables
@@ -188,57 +40,19 @@ function main() {
             }
 
             socket.emit("report message", profileUsernameInput.value, JSON.stringify(messageInfo));
-            createNotification("Sent report", "Sent the report to the server.");
+            createNotification("Sent report", "Sent a report to the server.");
         }
     }
 
-    function toggleEnlargedImage(img) {
-        if (enlargedImageOpen === false) {
-            if (img) {
-                var enlargedImageDiv = document.getElementById('enlargedImage');
-                var enlargedImageImg = enlargedImageDiv.getElementsByTagName('img')[0];
-                enlargedImageDiv.style.display = 'block';
-                enlargedImageImg.src = img;
-                setOverlay(true);
-                enlargedImageOpen = true;
-            }
-        } else {
-            var enlargedImageDiv = document.getElementById('enlargedImage');
-            var enlargedImageImg = enlargedImageDiv.getElementsByTagName('img');
-            enlargedImageDiv.style.display = 'none';
-            enlargedImageImg.src = '';
-            setOverlay(false);
-            enlargedImageOpen = false;
-        }
-    }
-
-    function createNotification(heading, text) {
-        var item = document.createElement('div');
-        item.id = "notification";
-        var head = document.createElement('p');
-        head.id = "heading";
-        head.innerText = truncateText(heading, 40);
-        var main = document.createElement('p');
-        main.id = "mainText";
-        main.innerText = truncateText(text, 40);
-
-        item.appendChild(head);
-        item.appendChild(main);
-        document.getElementById('notifications').appendChild(item);
-
-        setTimeout(function () {
-            item.remove();
-        }, 2500);
-    }
-
+    /*
     function createMessage(div, messageInfo) {
         var item = document.createElement('li');
         item.setAttribute("data-channel", messageInfo.Channel || "main");
         const usernameSpan = document.createElement("span");
-        var uP = document.createElement('p');
-        var tP = document.createElement('p');
-        var timeP = document.createElement('p');
-        var avI = document.createElement('img');
+        var uP = document.createElement('p'); // username
+        var tP = document.createElement('p'); // text content
+        var timeP = document.createElement('p'); // time
+        var avI = document.createElement('img'); // avatar
         const reportButton = document.createElement("button");
         uP.innerText = messageInfo.User;
         tP.innerHTML = processText(messageInfo.Content);
@@ -298,6 +112,7 @@ function main() {
         item.title = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         messages.appendChild(item);
     }
+    */
 
     function processURLs(text) {
         var urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -316,18 +131,6 @@ function main() {
         var first = processTags(text);
         var second = processURLs(first);
         return second;
-    }
-
-    function toggleUploadDialog() {
-        if (document.getElementById('uploadDialog').style.display === 'none') {
-            setOverlay(true);
-            document.getElementById('uploadDialog').style.display = 'block';
-            uploadDialogOpen = true;
-        } else {
-            setOverlay(false);
-            document.getElementById('uploadDialog').style.display = 'none';
-            uploadDialogOpen = false;
-        }
     }
 
     function createDM(user) {
@@ -394,7 +197,7 @@ function main() {
 
     function sendImage(base64) {
         if (base64) {
-            socket.emit('chat image', username, `${base64}`);
+            socket.emit('chatImage', {});
             toggleUploadDialog();
         }
     }
@@ -409,6 +212,18 @@ function main() {
             uploadInput.value = "";
         }
     };
+
+    function sendMessage(e) {
+        e.preventDefault();
+        if (input.value) {
+            if (openChat === 'main') {
+                socket.emit('chatMessage', {Username: username, Content: input.value, Channel: openChat});
+            } else {
+                socket.emit('sendDM', {From: username, To: openChat, Content: input.value});
+            }
+            input.value = '';
+        }
+    }
 
     // Events
     mainChatButton.addEventListener('click', function () {
@@ -431,17 +246,7 @@ function main() {
         }
     });
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (input.value) {
-            if (openChat === 'main') {
-                socket.emit('chat message', {User: username, Content: input.value, Channel: openChat});
-            } else {
-                socket.emit('sendDM', {From: profileUsernameInput.value, To: openChat, Content: input.value});
-            }
-            input.value = '';
-        }
-    });
+    form.addEventListener('submit', sendMessage);
 
     uploadImageButton.addEventListener('click', function (e) {
         e.preventDefault();
@@ -463,25 +268,25 @@ function main() {
     socket.on('avatarRequest', function () {
         socket.emit('avatarChanged', profileAvatarImg.src);
     });
-    socket.on('usernameChanged', function (oldUser, newUser, date) {
-        createSystemMessage(messages, `<b>${oldUser}</b> has changed their username to <b>${newUser}</b>.`, date);
-    });
-    socket.on('avatarChanged', function (base64, user, date) {
-        createSystemMessage(messages, `<b>${user}</b> has changed their avatar.`, date);
-    });
-    socket.on('chat message', function (messageInfo) {
+    // socket.on('usernameChanged', function (oldUser, newUser, date) {
+    //     createMessage(messages, `<b>${oldUser}</b> has changed their username to <b>${newUser}</b>.`, date);
+    // });
+    // socket.on('avatarChanged', function (base64, user, date) {
+    //     createSystemMessage(messages, `<b>${user}</b> has changed their avatar.`, date);
+    // });
+    socket.on('chatMessage', function (messageInfo) {
         createMessage(messages, messageInfo);
         window.scrollTo(0, document.body.scrollHeight);
     });
-    socket.on('chat image', function (user, img, avatar, time) {
-        createImageMessage(messages, user, img, avatar, time);
+    socket.on('chatImage', function (user, img, avatar, time) {
+        // createImageMessage(messages, user, img, avatar, time);
     });
-    socket.on('user joined', function (username, time) {
-        createSystemMessage(messages, "<strong>" + username + "</strong> joined the chat!", time);
+    socket.on('userJoined', function (username, time) {
+        // createSystemMessage(messages, "<strong>" + username + "</strong> joined the chat!", time);
         window.scrollTo(0, document.body.scrollHeight);
     });
-    socket.on('user left', function (username, time) {
-        createSystemMessage(messages, "<strong>" + username + "</strong> has left the chat.", time);
+    socket.on('userLeft', function (username, time) {
+        // createSystemMessage(messages, "<strong>" + username + "</strong> has left the chat.", time);
         window.scrollTo(0, document.body.scrollHeight);
     });
     socket.on('online', function (users, avatars) {
