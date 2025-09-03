@@ -1,324 +1,176 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const XMLHttpRequest = require("xhr2");
-
+const express = require('express');
 const app = express();
+const http = require('http');
 const server = http.createServer(app);
-const io = new Server(server, { connectionStateRecovery: {} });
-
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  connectionStateRecovery: {}
+});
 const PORT = 8080;
 app.set("view engine", "ejs");
-app.use(express.static("views"));
-app.get("/", (req, res) => res.render("chat"));
 
+app.get('/', (req, res) => {
+  res.render("chat")
+});
 
-let accounts = require("./data/accounts.json");
-const userUploadsDirectory = "userUploads";
-const defaultAvatar = `${userUploadsDirectory}/avatars/default.png`;
-const defaultAttachment = `${userUploadsDirectory}/attachments/default.png`;
 const replacements = {
-  "cute": "cute 🥵❤🍆🍑🔥",
-  "markus walker": "markus runner",
-  "my mom": "my mom 🥵",
-  "your mom": "mom mom 🥵",
-  "cat": "pussy",
-  "female dog": "bitch",
-  "truck": "2024 F-150® XL starting at $36,770",
-  "died": "had a skill issue",
-  "mountainside": "mountainside (better)",
+  ["cute"]: "cute 🥵❤🍆🍑🔥",
+  ["markus walker"]: "markus runner",
+  ["my mom"]: "my mom 🥵",
+  ["your mom"]: "mom mom 🥵",
+  ["you're"]: "you'r're are",
+  ["cat"]: "pussy",
+  ["female dog"]: "bitch",
+  ["truck"]: "2024 F-150® XL starting at $36,770",
+  ["died"]: "had a skill issue",
+  ["mountainside"]: "mountainside (mid)",
 };
 
-const users = {};
-const usernames = [];
-const avatars = {};
-const pings = {};
-const sockets = {};
-let checking = false;
+var users = {};
+var usernames = [];
+var avatars = {};
+var pings = {};
+var sockets = {};
 
-function createAccount(info) {
-  const account = {
-    ID: crypto.randomUUID(),
-    Username: info.Username,
-    Password: info.Password,
-    Avatar: info.Avatar
-  };
-
-  accounts.push(accounts.push(account));
-  return account;
-}
+var checking = false;
 
 function checkOffline() {
   try {
     checking = true;
-    Object.entries(pings).forEach(([id, ping]) => {
-      console.log(id);
-      if (ping < 1) {
-        const username = users[id];
-        // io.to("main").emit("user left", username, new Date());
-        usernames.splice(usernames.indexOf(username), 1);
-        delete users[id];
-        delete avatars[id];
-        delete pings[id];
-        io.emit("online", usernames, avatars);
+    for (var i = 0; i < pings.rows.length; i += 1) {
+      console.log('checking');
+      if (pings[i] < 1) {
+        io.to('main').emit("user left", users[i], new Date());
+        usernames.splice(usernames.indexOf(users[i]), usernames.indexOf(users[i]) + 1);
+        delete users[i];
+        delete avatars[i];
+        delete pings[i];
+        io.emit('online', usernames, avatars);
       } else {
-        pings[id] -= 1;
+        pings[i];
       }
-    });
+    }
     setTimeout(checkOffline, 5000);
   } catch (err) {
-    console.warn(err);
+
   }
 }
 checkOffline();
 
-function pong(id) {
+function pong(id, username) {
+  if (!usernames.indexOf(`${users[id]}`) > -1) {
+    users[id];
+  }
   pings[id] = 3;
 }
 
-function isUsernameTaken(username) {
-  return usernames.includes(username);
+function usernameTakenFunc(username) {
+  if (usernames.indexOf(`${username}`) > -1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function usernameTaken(username, callback) {
+  if (usernames.indexOf(`${username}`) > -1) {
+    callback(true);
+  } else {
+    callback(false);
+  }
 }
 
 async function changeUsername(username, id) {
-  if (!isUsernameTaken(username)) {
-    const oldUsername = users[id];
-    io.emit("usernameChanged", oldUsername, username, new Date());
-    avatars[username] = avatars[oldUsername];
-    delete avatars[oldUsername];
-    usernames[usernames.indexOf(oldUsername)] = username;
+  if (usernameTakenFunc(username) === false) {
+    io.emit('usernameChanged', users[id], username, new Date());
+    avatars[username] = avatars[users[id]];
+    delete avatars[users[id]];
+    usernames[usernames.indexOf(users[id])] = username;
     users[id] = username;
-    io.emit("online", usernames, avatars);
+    io.emit('online', usernames, avatars);
   }
 }
 
-function sendDM(info) {
-  console.log("Got a DM.");
-  console.log(users);
-  if (isUsernameTaken(users[info.To])) {
-    console.log("Username exists");
-    if (info.Content) {
-      console.log("Is message content");
-      for (const [key, value] of Object.entries(replacements)) {
-        const regex = new RegExp(`\\b${key}\\b`, "gi");
-        info.Content.replaceAll(regex, value);
-      }
+function sendDM(fromUser, toUser, message) {
+  if (usernameTakenFunc(users[toUser])) {
+
+    for (const key in replacements) {
+      const regex = new RegExp("\\b" + key + "\\b", "gi");
+      message = message.replaceAll(regex, replacements[key]);
     }
 
-    const fromUsername = users[info.From];
-    const avatar = avatars[fromUsername];
-    console.log(sockets);
-    io.to(toUser).emit("getDM", fromUsername, info.Content, avatar, new Date());
-    io.to(fromUser).emit(
-      "getDM",
-      fromUsername,
-      info.Content,
-      avatar,
-      new Date(),
-    );
+    io.to(toUser).emit('getDM', users[fromUser], message, avatars[users[fromUser]], new Date());
+    io.to(fromUser).emit('getDM', users[fromUser], message, avatars[users[fromUser]], new Date());
   }
 }
 
-function reportMessage(messageInfo, reportingUser) {
-  const request = new XMLHttpRequest();
-  request.open("POST", "https://discord.com/api/webhooks/..."); // Truncated webhook URL
-  request.setRequestHeader("Content-type", "application/json");
+io.on('connection', async (socket) => {
+    socket.join('main');
 
-  const content = Object.entries(messageInfo)
-    .map(([key, value]) => `**${key}**: ${value}`)
-    .join("\n");
+    socket.on('usernameTaken', usernameTaken);
 
-  const params = {
-    username: `${reportingUser}'s Report - BDog Chat UDX`,
-    avatar_url:
-      "https://cdn.discordapp.com/attachments/.../Ge9a9JAWQAA75MI.jpg",
-    content: `## ${reportingUser} has reported a message in ButterDog Chat.\n${content}`,
-  };
+    socket.on('sendDM', function(toUser, message) {
+      sendDM(socket.id, sockets[toUser], message);
+    });
 
-  request.send(JSON.stringify(params));
-}
+    socket.on('changeUsername', function(username){
+        changeUsername(username, socket.id);
+    });
 
-async function uploadFileToFolder(file, folder) {
-  try {
-    // Upload the file to the server
-    // Check if the file is above 10MB
-    
-    const filename = `${Date.now()}.${file.mimetype.split('/')[1]}`;
-    const filepath = `${userUploadsDirectory}/${folder}/${filename}`;
-    return new Promise((resolve, reject) => {
-      fs.writeFileSync(filepath, file.buffer, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(filepath);
+    socket.on('ping', function(username) {
+      pong(socket.id, username);
+    });
+
+    socket.on('login', function(username){
+        users[socket.id] = username;
+        sockets[username] = socket.id;
+        usernames.push(username);
+        io.to('main').emit('user joined', username, new Date());
+        io.emit('online', usernames, avatars);
+    });
+
+    socket.on('disconnect', function(){
+        if (users[socket.id]) {
+          io.to('main').emit("user left", users[socket.id], new Date());
+          usernames.splice(usernames.indexOf(users[socket.id]), usernames.indexOf(users[socket.id]) + 1);
+          delete sockets[users[socket.id]];
+          delete users[socket.id];
+          delete avatars[users[socket.id]];
+          io.emit('online', usernames, avatars);
         }
-      });
     });
-  } catch (err) {
-    console.warn(`Error during login: ${err}`);
-    return `${userUploadsDirectory}/attachments/default.png`;
-  }
-}
 
-async function uploadAvatar(imageFile) {
-  try {
-    // Upload the image file to the server
-    // Check if the file is above 10MB
-    console.log(typeof(imageFile));
-    if (imageFile.byteLength > 10 * 1024 * 1024) {
-      return null;
-    }
-    const filename = `${Date.now()}.${imageFile.mimetype.split('/')[1]}`;
-    const filepath = `${userUploadsDirectory}/avatars/${filename}`;
-    return new Promise((resolve, reject) => {
-      fs.writeFileSync(filepath, imageFile.buffer, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(filepath);
+    socket.on('changeAvatar', function(base64){
+        avatars[users[socket.id]] = base64;
+        io.emit('online', usernames, avatars);
+        io.emit('avatarChanged', base64, users[socket.id], new Date());
+    });
+
+    socket.on('chat message', (user, msg) => {
+        if (!usernameTakenFunc(user)) {
+          users[socket.id] = user;
+          usernames.push(user);
+          io.to('main').emit('user joined', user, new Date());
+          io.emit('online', usernames, avatars);
+          io.to(socket.id).emit('avatarRequest');
         }
-      });
+
+        var avatar = avatars[user];
+
+        for (const key in replacements) {
+          const regex = new RegExp("\\b" + key + "\\b", "gi");
+          msg = msg.replaceAll(regex, replacements[key]);
+        }
+
+        io.to('main').emit('chat message', user, msg, avatar, new Date());
     });
-  } catch (err) {
-    console.warn(`Error during login: ${err}`);
-    return `${userUploadsDirectory}/avatars/default.png`;
-  }
-}
 
-async function login(info, callback, socket) {
-  let username = info.Username || "";
-  let avatar = info.Avatar || null;
-  let silent = info.Silent || true;
-  // Remove spaces, and set the username to a default value if it's empty
-  if ((typeof(username) == "string" && (!username || username.trim() === "")) || typeof(username) != "string") {
-    username = `User${Math.floor(Math.random() * 90000) + 10000}`;
-  } else {
-    // Trim spaces from the username
-    username = username.trim();
-  }
-
-  if (isUsernameTaken(username)) {
-    callback({
-      Success: false,
-      Error: "Username is taken!",
-    });
-    return;
-  }
-
-  const avatarURL = await uploadAvatar(avatar);
-  if (avatarURL != null) {
-    // Avatar is valid, save all info and log in
-    users[socket.id] = username;
-    sockets[username] = socket.id;
-    avatars[users[socket.id]] = avatarURL;
-    usernames.push(username);
-    if (!silent) {
-      io.to("main").emit("message", {
-        Username: username,
-        Date: new Date(),
-        SystemMessage: true,
-      });
-    }
-    callback({
-      Success: true,
-      Username: username,
-      Avatar: avatarURL,
-    });
-    io.emit("online", usernames, avatars);
-  } else {
-    callback({
-      Success: false,
-      Error: "Avatar is cannot be larger than 10MB",
-    });
-  }
-}
-
-io.on("connection", (socket) => {
-  socket.join("main");
-
-  socket.on("sendDM", (toUser, message) => {
-    sendDM(socket.id, sockets[toUser], message);
-  });
-
-  socket.on("changeUsername", (username) => {
-    changeUsername(username, socket.id);
-  });
-
-  socket.on("ping", () => {
-    pong(socket.id);
-  });
-
-  socket.on("login", (info, callback) => {
-    login(info, callback, socket);
-  });
-
-  socket.on("disconnect", () => {
-    const username = users[socket.id];
-    if (username) {
-      io.to("main").emit("user left", username, new Date());
-      usernames.splice(usernames.indexOf(username), 1);
-      delete sockets[username];
-      delete users[socket.id];
-      delete avatars[username];
-      io.emit("online", usernames, avatars);
-    }
-  });
-
-  socket.on("changeAvatar", (base64) => {
-    avatars[users[socket.id]] = base64;
-    io.emit("online", usernames, avatars);
-    io.emit("avatarChanged", base64, users[socket.id], new Date());
-  });
-
-  socket.on("chatMessage", (info) => {
-    console.log(info);
-    if (!isUsernameTaken(info.User)) {
-      users[socket.id] = info.User;
-      usernames.push(info.User);
-      console.log(usernames);
-      console.log(avatars);
-      io.emit("online", usernames, avatars);
-    }
-
-    if (info.Content) {
-      for (const [key, value] of Object.entries(replacements)) {
-        const regex = new RegExp(`\\b${key}\\b`, "gi");
-        info.Content = info.Content.replaceAll(regex, value);
-      }
-    }
-
-    const avatar = avatars[info.User];
-    const messageInfo = {
-      Username: info.Username || "Username",
-      Content: info.Content,
-      Avatar: avatar || defaultAvatar,
-      Channel: info.Channel || "main",
-      Date: new Date(),
-    };
-
-    io.to("main").emit("chatMessage", messageInfo);
-  });
-
-  socket.on("sendDM", (info) => {
-    console.log(info);
-    sendDM(info);
-  });
-
-  socket.on("reportMessage", (user, messageInfo) => {
-    try {
-      const parsed = JSON.parse(messageInfo);
-      reportMessage(parsed, user);
-    } catch (err) {
-      console.warn(err);
-    }
-  });
-
-  socket.on("chatImage", (user, img) => {
-    const avatar = avatars[user];
-    io.to("main").emit("chat image", user, img, avatar, new Date());
+    socket.on('chat image', (user, img) => {
+      var avatar = avatars[user];
+      io.to('main').emit('chat image', user, img, avatar, new Date());
   });
 });
 
-server.listen(PORT, () =>
-  console.log(`Server started! Listening on port ${PORT}.`),
-);
+server.listen(PORT, () => {
+  console.log(`Server started! Listening on port ${PORT}.`);
+});
