@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ButterDog Chat Ultra Deluxe Premium Platinum Edition Pro Max Plus</title>
+  <link rel="shortcut icon"
+    href="https://raw.githubusercontent.com/butterdogco/butterdogco.github.io/main/img/favicon.ico">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,200" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    @keyframes messageAdd {
+      0% {
+        opacity: 0;
+        transform: translateX(-10%);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(0%);
+      }
+    }
+
+    @keyframes notificationAdd {
+      0% {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translateX(0%);
+      }
+
+      80% {
+        opacity: 1;
+        transform: translateX(0%);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    :root {
+      --color1: rgb(16, 17, 36);
+      --color2: rgb(8, 9, 21);
+      --color3: rgb(23, 23, 52);
+      --color4: rgb(48, 48, 96);
+
+      --color1trans: rgba(16, 17, 36, 0.6);
+      --color2trans: rgba(8, 9, 21, 0.6);
+      --color3trans: rgba(23, 23, 52, 0.6);
+      --color4trans: rgba(48, 48, 96, 0.6);
+
+      --textcolor1: rgb(255, 255, 255);
+      --textcolor2: rgb(205, 204, 204);
+      --textcolor3: rgba(196, 196, 196, 0.719);
+      --textcolor4: rgba(196, 196, 196, 0.301);
+
+      --linktextcolor1: rgb(90, 214, 222);
+      --linktextcolor2: rgb(80, 183, 191);
+    }
+
+    * {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--textcolor1);
+    }
+
+    body {
+      margin: 0;
+      padding-bottom: 3rem;
+      width: 100vw;
+      overflow-x: hidden;
+      background: var(--color2);
+    }
+
+    #notifications {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: none;
+      z-index: 6;
+
+      div#notification {
+        animation: notificationAdd 3s ease;
+        width: 400px;
+        height: 80px;
+        max-width: 90vw;
+        max-height: 40vh;
+        background: var(--color4trans);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 24px;
+        border: 3px solid var(--color3trans);
+
+        p#heading {
+          font-weight: bold;
+          width: 90%;
+          margin-top: 10px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        p#mainText {
+          width: 90%;
+          margin-top: 20px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+    }
+
+    #chatOverlay {
+      z-index: 4;
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      backdrop-filter: brightness(70%) blur(8px);
+      -webkit-backdrop-filter: brightness(70%) blur(8px);
+    }
+
+    #sidebar {
+      width: 20vw;
+      height: calc(100vh - 3.5rem - 0.25rem);
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: var(--color3);
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      #onlineCount {
+        text-align: center;
+      }
+
+      div#activeUsers {
+        overflow-wrap: break-word;
+        width: 100%;
+        
+        div#user {
+          width: 100%;
+          height: 50px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          overflow: hidden;
+          transition: 0.2s ease;
+
+          p#username {
+            display: inline;
+            height: 100%;
+            margin-left: 10px;
+            position: relative;
+            bottom: 50%;
+            transform: translateY(-50%);
+          }
+
+          img#avatar {
+            object-fit: contain;
+            display: inline;
+            height: 50px;
+            width: 50px;
+            overflow: hidden;
+            margin-left: 5px;
+            border-radius: 50%;
+            background: var(--color3);
+          }
+
+          button#DMbutton {
+            float: right;
+            position: relative;
+            right: 10px;
+            background: rgba(0, 0, 0, 0);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s ease;
+            border: none;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 40px;
+            padding: 5px;
+          }
+
+          button#DMbutton:hover {
+            background: var(--color3);
+          }
+
+          button#DMbutton span {
+            transform: translate(-50%, -50%);
+            position: relative;
+            margin-top: 65%;
+            margin-left: 50%;
+            height: 30px;
+          }
+        }
+
+        div#user:hover {
+          background: var(--color4);
+        }
+      } 
+
+      button#profileDialogButton {
+        width: 90%;
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color2);
+        font-size: 20px;
+        border-radius: 4vh;
+        padding: 12px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button#profileDialogButton:hover {
+        background: var(--color1);
+      }
+
+      button#mainChatButton {
+        width: 90%;
+        position: relative;
+        top: 15px;
+        left: 50%;
+        margin-bottom: 15px;
+        transform: translateX(-50%);
+        background: var(--color2);
+        font-size: 20px;
+        border-radius: 4vh;
+        padding: 12px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button#mainChatButton:hover {
+        background: var(--color1);
+      }
+    }
+
+    #form {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      height: 3.5rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+      z-index: 2;
+    }
+
+    #form input#input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+      background: var(--color4);
+    }
+
+    #form input#input:focus {
+      outline: none;
+    }
+
+    #form button,
+    #form p {
+      background: var(--color4);
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 12vh;
+      outline: none;
+      color: var(--textcolor1);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    #form button:hover,
+    #form p:hover {
+      background: var(--color3);
+    }
+
+    #form p span {
+      transform: translate(-50%, -50%);
+      position: relative;
+      top: 50%;
+      left: 50%;
+    }
+
+    #messages, .DM {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      width: 80vw;
+      margin-left: auto;
+
+      img#chatMessageImage {
+        max-width: 80vw;
+        max-height: 40vh;
+        min-width: 100px;
+        min-height: 100px;
+        border-radius: 2vh;
+        cursor: pointer;
+        transition: 0.1s ease;
+      }
+
+      img#chatMessageImage:hover {
+        filter: brightness(95%);
+      }
+
+      li#message {
+        padding: 0.5rem 1rem;
+        overflow-wrap: break-word;
+        background: var(--color1);
+        animation: messageAdd 0.35s ease;
+        transition: 0.2s ease;
+
+        p#username {
+          font-weight: bold;
+          margin-bottom: -5px;
+          margin-top: 0;
+        }
+
+        img#avatar {
+          width: 50px;
+          height: 50px;
+          object-fit: contain;
+          float: left;
+          margin-top: 15px;
+          margin-right: 10px;
+          border-radius: 50%;
+        }
+      }
+
+      li#message:hover {
+        background: var(--color3);
+
+        p#username p#sendTime {
+          color: var(--textcolor3);
+        }
+      }
+
+      li#message p#username p#sendTime {
+        color: var(--textcolor4);
+        display: inline-flex;
+        font-weight: normal;
+        margin-left: 5px;
+        transition: 0.2s ease;
+      }
+
+      li#message p#text {
+        margin-top: 0;
+        font-weight: normal;
+
+        a {
+          color: var(--linktextcolor1);
+          transition: 0.2s ease;
+        }
+
+        a:hover {
+          color: var(--linktextcolor2);
+        }
+      }
+    }
+
+    div#uploadDialog {
+      background: var(--color4);
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 3vh;
+      text-align: center;
+      width: 500px;
+      height: 500px;
+      max-width: 90vw;
+      max-height: 90vh;
+      z-index: 5;
+
+      button#closeButton {
+        float: right;
+        position: absolute;
+      }
+
+      button#submitImageButton {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 4vh;
+        background: var(--color3);
+        width: 85%;
+        padding: 12px;
+        border: none;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button#submitImageButton:hover {
+        background: var(--color1);
+      }
+
+      img#imagePreview {
+        height: 55%;
+        max-width: 90%;
+        object-fit: contain;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 10px;
+        border-radius: 2vh;
+      }
+
+      input::file-selector-button {
+        color: var(--textcolor1);
+        padding: 12px;
+        background: var(--color1);
+        border: none;
+        border-radius: 4vh;
+        width: 59%;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      input::file-selector-button:hover {
+        background-color: var(--color2);
+      }
+    }
+
+    div#profileDialog {
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color4);
+      border-radius: 3vh;
+      width: 500px;
+      height: 380px;
+      max-width: 100vw;
+      max-height: 100vh;
+      z-index: 5;
+      overflow: hidden;
+
+      button#profileCloseButton {
+        background: var(--color4);
+        border: none;
+        padding: 12px;
+        font-weight: bold;
+        position: absolute;
+        right: 7px;
+        top: 7px;
+        font-size: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        transform: 0.2s ease;
+        aspect-ratio: 1/1;
+      }
+
+      button#profileCloseButton:hover {
+        background: var(--color2);
+      }
+
+      img#avatarIcon {
+        height: 50px;
+        aspect-ratio: 1;
+        margin-left: 10px;
+        border-radius: 50%;
+      }
+
+      input::file-selector-button {
+        color: var(--textcolor1);
+        padding: 12px;
+        background: var(--color3);
+        border: none;
+        border-radius: 4vh;
+        width: 50%;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      input::file-selector-button:hover {
+        background-color: var(--color1);
+      }
+
+      input#usernameInput {
+        border-radius: 4vh;
+        width: 90%;
+        padding: 12px;
+        background: var(--color3);
+        margin-left: 50%;
+        transform: translateX(-50%);
+        border: none;
+        text-align: center;
+      }
+
+      button#profileSaveButton {
+        width: 95%;
+        padding: 12px;
+        background: var(--color3);
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 4vh;
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button#profileSaveButton:hover {
+        background: var(--color1);
+      }
+    }
+
+    div#enlargedImage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+
+      img {
+        max-width: 90vw;
+        max-height: 90vh;
+        min-height: 20vh;
+        min-width: 20vw;
+        object-fit: contain;
+        border-radius: 4px;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      #messages, .DM {
+        width: calc(100vw - 5%);
+        margin-left: 0;
+        transform: translateX(5%);
+      }
+      #sidebar {
+        transform: translateX(-95%);
+        width: 85vw;
+        transition: 0.3s ease;
+        z-index: 2;
+      }
+      #sidebar:hover {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="notifications">
+
+  </div>
+  <div id="chatOverlay" style="display: none;"></div>
+  <div id="sidebar">
+    <button id="mainChatButton">Main Chat</button>
+    <h2 id="onlineCount">Online</h2>
+    <div id="activeUsers">
+
+    </div>
+    <button id="profileDialogButton">Edit Profile</button>
+  </div>
+
+  <ul id="messages">
+
+  </ul>
+
+  <div id="uploadDialog" style="display:none;">
+    <h2>Upload Image</h2>
+    <input id="imageUploadInput" type="file" accept=".png,.jpeg,.jpg,.webp,.tiff,.gif">
+    <br>
+    <img id="imagePreview" title="Preview">
+    <button id="submitImageButton">Send</button>
+  </div>
+
+  <div id="profileDialog" style="display: none;">
+    <button id="profileCloseButton" style="display: none;">X</button>
+    <h2>Your Profile</h2>
+    <p id="avatarLabel">Avatar</p>
+    <img id="avatarIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAQFJREFUaEPtmFEKhDAMRNv7H7qLC4II2sR5bsky/krjvEyStvZW/OnF9TcDrHbQDvydA2OMcQfVe0ddR4PNxO9gJAQCEBV+doYAMcDT7FPlJDmgiicgDEDsA0oz2wE70FpzCSlloI5SJfubbqmJtwDlARQINfuIA3v5ZZ0gxKMAGSco8TjAcRicHSFFH78jN7EywYi1BijdxNnJc1UySn+kS4gSTcGEAd4W/vTCHwL4tfjMVXMKsEp8FOIWYLX4CIQBiN10FuNuzJZw4Htou/gpbICZ/dT70g6U74HHAJlbFlUq2SPFdCdeCRE5pYYA3souEdcARBaVGHZAyR6xtrwDH8Z8iDGmwhl9AAAAAElFTkSuQmCC">
+    <br>
+    <input id="avatarUploadInput" type="file" accept=".png,.jpeg,.jpg,.webp,.tiff,.gif">
+
+    <p id="usernameLabel">Username</p>
+    <input id="usernameInput" type="text" maxlength="24" placeholder="Enter a username">
+    <button id="profileSaveButton">Save</button>
+  </div>
+
+  <div id="enlargedImage" style="display: none;">
+    <img src="">
+  </div>
+
+  <form id="form" action="">
+    <p id="imageUploadButton">
+      <span class="material-symbols-rounded">upload_file</span>
+    </p>
+    <input id="input" autocomplete="off" maxlength="1000" placeholder="Type a message">
+    <button id="messageSend">Send</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var username = null;
+    var avatarBase64 = null;
+
+    var profileDialog = document.getElementById('profileDialog');
+    var profileSaveButton = document.getElementById('profileSaveButton');
+    var profileUsernameInput = document.getElementById('usernameInput');
+    var profileAvatarInput = document.getElementById('avatarUploadInput');
+    var profileAvatarImg = document.getElementById('avatarIcon');
+    var profileUsernameLabel = document.getElementById('usernameLabel');
+    var editProfileButton = document.getElementById('profileDialogButton');
+    var profileCloseButton = document.getElementById('profileCloseButton');
+    var accountSetup = false;
+    var profileDialogOpen = false;
+    var uploadDialogOpen = false;
+    var enlargedImageOpen = false;
+
+    if (localStorage.getItem("username")) {
+      profileUsernameInput.value = localStorage.getItem("username");
+    }
+    if (localStorage.getItem("avatar")) {
+      profileAvatarImg.src = localStorage.getItem("avatar");
+    }
+
+    const convertBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+
+          fileReader.onload = () => {
+            resolve(fileReader.result);
+          };
+
+          fileReader.onerror = (error) => {
+            reject(error);
+          };
+        });
+      };
+
+      function truncateText(text, maxLength) {
+        var element = text;
+
+        if (element.length > maxLength) {
+          element = element.substr(0,maxLength) + '...';
+        }
+        return element;
+      }
+
+    function setOverlay(val) {
+        var overlay = document.getElementById('chatOverlay');
+        if (val === true) {
+          overlay.style.display = 'block';
+        } else {
+          overlay.style.display = 'none';
+        }
+    }
+
+    function toggleProfileDialog() {
+        if (profileDialog.style.display === 'none') {
+          setOverlay(true);
+          profileDialog.style.display = 'block';
+          profileDialogOpen = true;
+        } else {
+          setOverlay(false);
+          profileDialog.style.display = 'none';
+          profileDialogOpen = false;
+        }
+    }
+
+    async function previewProfileImage(event) {
+      const file = event.target.files[0];
+      if (file.size < 800000) {
+        profileAvatarImg.src = await convertBase64(file);
+        avatarBase64 = await convertBase64(file);
+      } else {
+        alert("That image is too large! It must be less than 1MB.");
+        profileAvatarInput.value = "";
+      }
+      
+    }
+
+    function saveProfile(user) {
+      if (accountSetup === true) {
+        if (localStorage.getItem('username') != user) {
+          socket.emit('changeUsername', user);
+        }
+        if (localStorage.getItem('avatar') != profileAvatarImg.src) {
+          socket.emit('changeAvatar', profileAvatarImg.src);
+        }
+      } else {
+        socket.emit('login', user);
+        socket.emit('changeAvatar', profileAvatarImg.src);
+        profileCloseButton.style.display = 'block';
+      }
+      localStorage.setItem("username", user);
+      localStorage.setItem("avatar", profileAvatarImg.src);
+    }
+
+    profileCloseButton.addEventListener('click', (e) => {
+      toggleProfileDialog();
+    });
+
+    profileAvatarInput.addEventListener('change', (e) => {
+      previewProfileImage(e);
+    });
+
+    profileSaveButton.addEventListener('click', function() {
+      socket.emit('usernameTaken', profileUsernameInput.value, (response) => {
+        if (response === true && username != profileUsernameInput.value) {
+          profileUsernameLabel.innerText = "Username in-use! Try another.";
+          setTimeout(function(){
+            profileUsernameLabel.innerText = "Username";
+          }, 3000);
+        } else {
+          toggleProfileDialog();
+          if (accountSetup === false) {
+            username = profileUsernameInput.value.replace(/ /g, "");
+            username = profileUsernameInput.value.replace("⠀", "");
+            if (username === null || username === "") {
+              username = "User" + (Math.floor(Math.random() * 90000) + 10000);
+            }
+            saveProfile(username);
+            accountSetup = true;
+            main();
+          } else {
+            var usertemp = profileUsernameInput.value.replace(/ /g, "");
+            if (usertemp === null || usertemp === "") {
+              usertemp = "User" + (Math.floor(Math.random() * 90000) + 10000);
+            }
+            username = usertemp;
+            saveProfile(usertemp);
+          }
+        }
+      })
+    });
+
+    editProfileButton.addEventListener('click', function() {
+      toggleProfileDialog();
+    });
+
+    toggleProfileDialog();
+
+    function main() {
+      // Variables
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+      var uploadImageButton = document.getElementById('imageUploadButton');
+      var imagePreview = document.getElementById('imagePreview');
+      var submitImageButton = document.getElementById('submitImageButton')
+      var uploadInput = document.getElementById('imageUploadInput');
+      var activeUsers = document.getElementById('activeUsers');
+      var onlineCount = document.getElementById('onlineCount');
+      var mainChatButton = document.getElementById('mainChatButton');
+      var openChat = "main";
+
+      // Functions
+      function toggleEnlargedImage(img) {
+        if (enlargedImageOpen === false) {
+          if (img) {
+            var enlargedImageDiv = document.getElementById('enlargedImage');
+            var enlargedImageImg = enlargedImageDiv.getElementsByTagName('img')[0];
+            enlargedImageDiv.style.display = 'block';
+            enlargedImageImg.src = img;
+            setOverlay(true);
+            enlargedImageOpen = true;
+          }
+        } else {
+          var enlargedImageDiv = document.getElementById('enlargedImage');
+          var enlargedImageImg = enlargedImageDiv.getElementsByTagName('img');
+          enlargedImageDiv.style.display = 'none';
+          enlargedImageImg.src = '';
+          setOverlay(false);
+          enlargedImageOpen = false;
+        }
+      }
+
+      function createNotification(heading, text) {
+        var item = document.createElement('div');
+        item.id = "notification";
+        var head = document.createElement('p');
+        head.id = "heading";
+        head.innerText = truncateText(heading, 40);
+        var main = document.createElement('p');
+        main.id = "mainText";
+        main.innerText = truncateText(text, 40);
+
+        item.appendChild(head);
+        item.appendChild(main);
+        document.getElementById('notifications').appendChild(item);
+
+        setTimeout(function() {
+          item.remove();
+        }, 3000);
+      }
+
+      function createMessage(div, u, text, avatar, date) {
+        var item = document.createElement('li');
+        var uP = document.createElement('p');
+        var tP = document.createElement('p');
+        var timeP = document.createElement('p');
+        var avI = document.createElement('img');
+        uP.innerText = u;
+        tP.innerHTML = processText(text);
+        avI.src = avatar;
+        timeP.innerText = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        item.id = "message";
+        uP.id = "username";
+        tP.id = "text";
+        avI.id = "avatar";
+        timeP.id = "sendTime";
+        item.appendChild(avI);
+        uP.appendChild(timeP);
+        item.appendChild(uP);
+        item.appendChild(tP);
+        div.appendChild(item);
+      }
+
+      function createImageMessage(div, u, base64, avatar, date) {
+        var item = document.createElement('li');
+        var uP = document.createElement('p');
+        var iE = document.createElement('img');
+        var timeP = document.createElement('p');
+        var avI = document.createElement('img');
+        uP.innerText = u;
+        iE.src = base64;
+        iE.title = "Click to enlarge";
+        item.id = "message";
+        timeP.innerText = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        avI.src = avatar;
+        uP.id = "username";
+        iE.id = "chatMessageImage";
+        avI.id = "avatar";
+        timeP.id = "sendTime";
+        uP.appendChild(timeP);
+        item.appendChild(avI);
+        item.appendChild(uP);
+        item.appendChild(iE);
+        div.appendChild(item);
+
+        iE.onclick = function(){
+          toggleEnlargedImage(base64);
+        }
+        iE.onload = function(){
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+      }
+
+      function createSystemMessage(div, text, date) {
+        var item = document.createElement('li');
+        item.innerHTML = text;
+        item.id = "message";
+        item.title = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        messages.appendChild(item);
+      }
+
+      function processURLs(text) {
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replaceAll(urlRegex, function (url) {
+          return '<a target="_blank" href="' + url + '"">' + url + '</a>'
+        });
+      }
+
+      function processTags(text) {
+        var first = text.replaceAll("<", "&lt");
+        var second = first.replaceAll(">", "&gt");
+        return second;
+      }
+
+      function processText(text) {
+        var first = processTags(text);
+        var second = processURLs(first);
+        return second;
+      }
+
+      function toggleUploadDialog() {
+        if (document.getElementById('uploadDialog').style.display === 'none') {
+          setOverlay(true);
+          document.getElementById('uploadDialog').style.display = 'block';
+          uploadDialogOpen = true;
+        } else {
+          setOverlay(false);
+          document.getElementById('uploadDialog').style.display = 'none';
+          uploadDialogOpen = false;
+        }
+      }
+
+      function createDM(user) {
+        if (!document.getElementById(user + "-DMs")) {
+          var div = document.createElement('div');
+          div.id = user + "-DMs";
+          div.className = "DM";
+          div.style.display = "none";
+          document.body.appendChild(div);
+        }
+      }
+
+      function getDM(user, message, avatar, time) {
+        // If it is not from me
+        if (profileUsernameInput.value !== user) {
+          createDM(user);
+          var div = document.getElementById(user + "-DMs");
+          createMessage(div, user, message, avatar, time);
+        } else {
+          var div = document.getElementById(openChat + "-DMs");
+          createMessage(div, user, message, avatar, time);
+        }
+
+        // If the chat is open
+        if (openChat === user) {
+          window.scrollTo(0, document.body.scrollHeight);
+        } else {
+          createNotification(user, message);
+        }
+      }
+
+      function sendDM(user, message) {
+        socket.emit('DM', user, message);
+        var div = document.getElementById(user + "-DMs");
+        createMessage(div, profileUsernameInput.value, message, avatar, new Date());
+      }
+
+      function openDM(user) {
+        if (document.getElementById(openChat + "-DMs")) {
+          document.getElementById(openChat + "-DMs").style.display = 'none';
+        } else if (openChat === 'main') {
+          document.getElementById('messages').style.display = 'none';
+        }
+
+        createDM(user);
+        openChat = user;
+
+        var div = document.getElementById(user + "-DMs");
+        if (div) {
+          div.style.display = 'block';
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+      }
+
+      function closeDM(user) {
+        var div = document.getElementById(user + "-DMs");
+        if (div) {
+          div.style.display = 'none';
+          openChat = 'main';
+          document.getElementById('messages').style.display = 'block';
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+      }
+
+      function sendImage(base64) {
+        if (base64) {
+          socket.emit('chat image', username, `${base64}`);
+          toggleUploadDialog();
+        }
+      }
+
+      const previewImage = async (event) => {
+        const file = event.target.files[0];
+        if (file.size < 800000) {
+          var base64 = await convertBase64(file);
+          imagePreview.src = base64;
+        } else {
+          alert("That image is too large! It must be less than 1MB.");
+          uploadInput.value = "";
+        }
+      };
+
+      // Events
+      mainChatButton.addEventListener('click' , function() {
+        if (openChat !== 'main') {
+          closeDM(openChat);
+        }
+      });
+
+      document.getElementById('chatOverlay').addEventListener('click', function() {
+        if (accountSetup === true) {
+          if (profileDialogOpen === true) {
+            toggleProfileDialog();
+          }
+          if (uploadDialogOpen === true) {
+            toggleUploadDialog();
+          }
+          if (enlargedImageOpen === true) {
+            toggleEnlargedImage();
+          }
+        }
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (input.value) {
+          if (openChat === 'main') {
+            socket.emit('chat message', username, input.value);
+          } else {
+            socket.emit('sendDM', openChat, input.value);
+          }
+          input.value = '';
+        }
+      });
+
+      uploadImageButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggleUploadDialog();
+      });
+
+      uploadInput.addEventListener("change", (e) => {
+        previewImage(e);
+      });
+
+      submitImageButton.addEventListener('click', function () {
+        sendImage(imagePreview.src);
+      });
+
+      // Socket Functions
+      socket.on('getDM', function(user, message, avatar, time) {
+        getDM(user, message, avatar, time);
+      });
+      socket.on('avatarRequest', function() {
+        socket.emit('avatarChanged', profileAvatarImg.src);
+      });
+      socket.on('usernameChanged', function(oldUser, newUser, date){
+        createSystemMessage(messages, `<b>${oldUser}</b> has changed their username to <b>${newUser}</b>.`, date);
+      });
+      socket.on('avatarChanged', function(base64, user, date){
+        createSystemMessage(messages, `<b>${user}</b> has changed their avatar.`, date);
+      });
+      socket.on('chat message', function (user, msg, avatar, time) {
+        createMessage(messages, user, msg, avatar, time);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      socket.on('chat image', function (user, img, avatar, time) {
+        createImageMessage(messages, user, img, avatar, time);
+      });
+      socket.on('user joined', function (username, time) {
+        createSystemMessage(messages, "<strong>" + username + "</strong> joined the chat!", time);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      socket.on('user left', function (username, time) {
+        createSystemMessage(messages, "<strong>" + username + "</strong> has left the chat.", time);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      socket.on('online', function (users, avatars) {
+        onlineCount.innerHTML = `Online (${users.length})`;
+        activeUsers.innerHTML = "";
+        users.forEach(user => {
+          var item = document.createElement('div');
+          var username = document.createElement('p');
+          var avatar = document.createElement('img');
+          item.id = 'user';
+          username.innerText = user;
+          username.id = 'username';
+          avatar.src = avatars[user];
+          avatar.id = 'avatar';
+          item.appendChild(avatar);
+          item.appendChild(username);
+          activeUsers.appendChild(item);
+
+          if (user !== profileUsernameInput.value) {
+            var dmButton = document.createElement('button');
+            var icon = document.createElement('span');
+            // dmButton.innerText = 'Message';
+            dmButton.id = 'DMbutton';
+            dmButton.onclick = function() {
+              openDM(user);              
+            }
+            icon.innerHTML = "forum";
+            icon.className = "material-symbols-rounded";
+            dmButton.appendChild(icon);
+            item.appendChild(dmButton);
+          }
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+html,
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+nav {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  width: 100vw;
+  border-bottom: 2px solid #45a049;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+main {
+  padding: 12px;
+}
