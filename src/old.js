@@ -1,19 +1,6 @@
-// This file sets up a basic web server using Express and Socket.IO
-// The client-server works like so:
-// 1. Client enters the website
-// 2. Client signs in/up with a username and password
-// 3. Client is entered into the chatroom, where they can:
-// - Chat globally, or privately with another user
-// - Send files (images, videos, and audio have previews whereas other files are downloadable links)
-// - See who else is online
-// - See when another user is typing
-// - See when another user is online or offline
-// - Edit or delete their own messages
-// - Recover their connection if they accidentally disconnect (e.g. refresh, network issues)
-// - View other users' profiles by clicking on their username, same with their own profile but with an edit option
-// 4. Client can sign out, which returns them to the sign in/up page
-
+// Constants
 const PORT = process.env.PORT || 3000;
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();

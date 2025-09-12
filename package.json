@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "ButterDogCo's chat app",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.2",
     "ejs": "^3.1.9",
     "express": "^4.21.2",
-    "socket.io": "^4.7.0"
+    "express-session": "^1.18.2",
+    "http": "^0.0.1-security",
+    "mongoose": "^8.18.1",
+    "socket.io": "^4.8.1"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/server.js"
   }
 }
