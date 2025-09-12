@@ -11,7 +11,7 @@
 <body>
   <main>
     <h2>Login</h2>
-    <form method="POST" action="/login">
+    <form>
       <input type="text" name="username" placeholder="Username" required maxlength="24" />
       <input type="password" name="password" placeholder="Password" required />
       <button type="submit">Login</button>
@@ -23,4 +23,37 @@
       </p>
       <% } %>
   </main>
+
+  <script>
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = form.username.value.trim();
+      if (username.length === 0) {
+        alert('Username cannot be empty or just spaces.');
+      } else if (username.length > 24) {
+        alert('Usernames are less than 24 characters.');
+      } else {
+        // Send a POST request to /auth/login
+        fetch('/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password: form.password.value })
+        }).then(res => {
+          if (res.redirected) {
+            window.location.href = res.url;
+          } else {
+            res.text().then(text => {
+              document.body.innerHTML = text;
+            });
+          }
+        }).catch(err => {
+          console.error('Error:', err);
+          alert('An error occurred. Please try again.');
+        });
+      }
+    });
+  </script>
 </html>

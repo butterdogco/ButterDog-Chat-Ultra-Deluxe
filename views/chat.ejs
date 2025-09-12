@@ -15,19 +15,25 @@
       <span id="username">
         <%= username %>
       </span>
-      <button id="logout-button">Logout</button>
+      <button id="logout-button" onclick="userLogout()">Logout</button>
     </div>
   </nav>
   <main>
-    <div id="chat-container">
-      <div id="messages"></div>
-      <form id="message-form">
-        <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required />
-        <button type="submit">Send</button>
-      </form>
+    <div id="chat-container" class="chat-container">
+      <div id="messages-container" class="messages-container"></div>
     </div>
+    <form id="message-form" class="message-form">
+      <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required />
+      <button type="submit">Send</button>
+    </form>
   </main>
-  <script src="js/chat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/chat.js" defer></script>
 </body>
 
 </html>
