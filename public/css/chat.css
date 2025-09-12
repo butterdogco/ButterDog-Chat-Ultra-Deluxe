@@ -23,29 +23,44 @@ main {
   flex-grow: 1;
 
   .messages-container {
-    height: calc(100vh - var(--message-form-height) - var(--page-padding));
+    height: calc(100vh - var(--message-form-height) - (var(--page-padding) * 3));
     overflow-y: auto;
 
     .message {
-      background: transparent;
+      background: var(--message-background, transparent);
       transition: background 0.15s;
-      padding: 4px 12px 4px 12px;
-      border-radius: 12px;
+      padding: var(--message-padding, 4px 12px 4px 12px);
+      border-radius: var(--message-border-radius, 12px);
+
+      p, span {
+        margin: var(--message-text-margin, 4px);
+        padding: 0;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
 
       .meta {
-        color: black;
+        color: var(--text-primary, white);
 
         .send-time {
-          color: gray;
+          color: var(--text-placeholder, lightgray);
         }
       }
 
       .content {
-        color: black;
+        color: var(--text-primary, white);
+      }
+
+      &:not(:only-child):not(:last-child):not(:nth-last-child(2)) {
+        border-bottom: var(--message-seperator, 1px solid #ffffff27);
+      }
+
+      &:last-child:not(:only-child):not(:first-child) {
+        border-top: var(--message-seperator, 1px solid #ffffff27);
       }
 
       &:hover {
-        background: #e9e9e9;
+        background: var(--message-hover-background, #ffffff80);
       }
       /* Looks weird right now, will revisit later
       &.child-message {
@@ -64,7 +79,7 @@ main {
   bottom: var(--page-padding);
   display: flex;
   flex-direction: row;
-  width: var(--max-width);
+  width: calc(var(--max-width) - var(--nav-width) - (var(--page-padding) * 2));
   height: var(--message-form-height);
 
   *:first-child {
@@ -76,19 +91,25 @@ main {
   }
 
   input, button[type="submit"] {
-    border: 1px solid #ccc;
+    border: var(--border-separator, 1px solid #ccc);
     font-size: 16px;
-    outline: none;
+    border: none;
+    transition: var(--transition-common, all 0.15s ease);
   }
 
   button[type="submit"] {
-    background-color: #4CAF50;
+    background-color: var(--button-background, #4CAF50);
     color: white;
     cursor: pointer;
+    padding: 0 12px 0 12px;
+
+    &:hover {
+      background-color: var(--button-hover-background, #45a049);
+    }
   }
 
   input[type="text"] {
+    border-right: var(--border-separator, 1px solid #ccc);
     flex-grow: 1;
-    padding: 6px;
   }
 }

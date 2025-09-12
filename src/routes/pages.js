@@ -15,8 +15,7 @@ router.get('/', (req, res) => {
 // Chat page
 router.get('/chat', (req, res) => {
   if (req.session.userId) {
-    console.log("Rendering chat page for user:", req.session.username);
-    res.render("chat", { username: req.session.username });
+    res.render("chat", { username: req.session.username, uuid: req.session.uuid });
   } else {
     console.log("User not authenticated, redirecting to login");
     res.redirect('/login');

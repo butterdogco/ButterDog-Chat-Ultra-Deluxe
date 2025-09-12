@@ -14,6 +14,9 @@ router.get('/messages', async (req, res) => {
   if (req.query.limit && isNaN(parseInt(req.query.limit))) {
     return res.status(400).json({ error: 'Limit must be a number' });
   }
+  if (req.query.offset && isNaN(parseInt(req.query.offset))) {
+    return res.status(400).json({ error: 'Offset must be a number' });
+  }
 
   const room = req.query.room || 'global';
   const limit = parseInt(req.query.limit) || 20;
@@ -22,6 +25,7 @@ router.get('/messages', async (req, res) => {
     const messages = await Message.find({ room })
       .sort({ timestamp: -1 })
       .limit(limit)
+      .skip(parseInt(req.query.offset) || 0)
       .exec();
     res.json(messages.reverse()); // Reverse to get chronological order
   } catch (err) {

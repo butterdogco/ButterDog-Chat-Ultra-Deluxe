@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const User = require('../models/User');
 
 // Sign up
@@ -24,13 +25,13 @@ router.post('/signup', async (req, res) => {
   try {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
-    console.log("Creating user:", username);
+    const uuid = crypto.randomUUID();
+    const newUser = new User({ username, password: hashedPassword, createdAt: new Date(), uuid: uuid });
     await newUser.save();
     
+    req.session.uuid = uuid; // Store unique user UUID in session
     req.session.userId = newUser._id; // Store user ID in session
     req.session.username = newUser.username; // Store username in session
-    console.log("User created and logged in:", username);
     res.redirect('/chat');
   } catch (err) {
     console.error("Error during signup:", err);
@@ -54,7 +55,6 @@ router.post('/login', async (req, res) => {
   
   try {
     const user = await User.findOne({ username });
-    console.log("Logging in user:", username);
 
     if (!user) {
       console.log("User not found:", username);
@@ -66,6 +66,7 @@ router.post('/login', async (req, res) => {
       console.log("Invalid password for user:", username);
       return res.status(400).render("login", { error: "Invalid username or password" });
     } else {
+      req.session.uuid = user.uuid; // Store unique user UUID in session
       req.session.userId = user._id; // Store user ID in session
       req.session.username = user.username; // Store username in session
       console.log(req.session.userId != null ? "Session userId set" : "Session userId not set");

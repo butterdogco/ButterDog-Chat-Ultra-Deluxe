@@ -4,14 +4,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ButterDog Chat Ultra Deluxe Premium Plus Max Pro</title>
+  <title>ButterDog Chat</title>
+  
+  <!-- Preloading -->
+  <link rel="preload" href="img/Logo-icon.png" as="image">
+  <link rel="preload" href="img/Logo-wide.png" as="image">
+  <link rel="preload" href="css/themes/Abyss.css" as="style"> <!-- Default theme -->
+  <link rel="preload" href="css/chat.css" as="style">
+  
+  <link rel="icon" type="image/png" href="img/Logo-icon.png">
   <link rel="stylesheet" href="css/chat.css">
 </head>
 
 <body>
   <nav>
-    <h1>ButterDog Chat Ultra Deluxe Premium Plus Max Pro</h1>
-    <div id="user-info">
+    <img src="img/Logo-wide.png" alt="ButterDog Chat Logo" class="logo">
+    <div class="channels">
+      <h2>Channels & Users</h2>
+      <button class="channel-button active" data-room="global" onclick="switchRoom('global')">Global</button>
+      <!-- Other users, and group chats will be shown here -->
+    </div>
+    <div id="user-info" class="user-info">
       <span id="username">
         <%= username %>
       </span>
@@ -28,12 +41,18 @@
     </form>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>
     eruda.init();
+  </script> -->
+  
+  <!-- EJS Variables -->
+  <script>
+    const username = "<%= username %>";
+    const userUUID = "<%= uuid %>";
   </script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/chat.js" defer></script>
+  <script src="js/chat.js"></script>
 </body>
 
 </html>
