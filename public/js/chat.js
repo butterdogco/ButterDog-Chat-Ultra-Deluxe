@@ -54,14 +54,14 @@ function createMessageElement(message, parseDate = true) {
   const meta = document.createElement('p');
   meta.classList.add('meta');
   meta.innerText = message.sender + ' ';
-  
+
   const timeSpan = document.createElement('span');
   timeSpan.classList.add('send-time');
   timeSpan.innerText = message.timeString;
   meta.appendChild(timeSpan);
-  
+
   div.appendChild(meta);
-  
+
   const content = document.createElement('p');
   content.classList.add('content');
   content.innerText = message.text;
