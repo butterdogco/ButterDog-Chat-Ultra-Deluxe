@@ -2,60 +2,35 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign up</title>
-  <link rel="stylesheet" href="css/login.css" />
+    <title>Signup - ButterDog Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Signup for ButterDog Chat">
+    <meta name="og:description" content="Signup for ButterDog Chat">
+    <meta name="author" content="ButterDogCo">
+    <link rel="stylesheet" href="./css/auth.css">
+    <link rel="shortcut-icon" href="./favicon.ico">
 </head>
 
 <body>
-  <main>
-    <img src="img/Logo-wide.png" alt="ButterDog Chat Logo" class="logo">
-    <h2>Sign up</h2>
-    <form>
-      <input type="text" name="username" placeholder="Username" required maxlength="24" />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Sign up</button>
-    </form>
-    <p>Already have an account? <a href="/login">Login here</a></p>
-    <% if (error) { %>
-      <p class="error">
-        <%= error %>
-      </p>
-      <% } %>
-  </main>
+    <main>
+        <div class="container">
+            <h1 class="header">Signup</h1>
 
-  <script>
-    const form = document.querySelector('form');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = form.username.value.trim();
-      if (username.length === 0) {
-        alert('Username cannot be empty or just spaces.');
-      } else if (username.length > 24) {
-        alert('Username cannot exceed 24 characters.');
-      } else {
-        // Send a POST request to /auth/signup
-        fetch('/auth/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, password: form.password.value })
-        }).then(res => {
-          if (res.redirected) {
-            window.location.href = res.url;
-          } else {
-            res.text().then(text => {
-              document.body.innerHTML = text;
-            });
-          }
-        }).catch(err => {
-          console.error('Error:', err);
-          alert('An error occurred. Please try again.');
-        });
-      }
-    });
-  </script>
+            <form>
+                <label for="username-input">Username</label>
+                <input class="text-input" type="text" placeholder="Enter username" id="username-input">
+                <label for="password-input">Password</label>
+                <input class="text-input" type="password" placeholder="Enter password" id="password-input">
+                <label for="confirm-password-input">Confirm Password</label>
+                <input class="text-input" type="password" placeholder="Enter password again" id="confirm-password-input">
+                <button type="submit" onclick="signup(event)">Signup</button>
+                <div class="error" id="error-message"></div>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+</body>
 
 </html>

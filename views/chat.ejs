@@ -2,57 +2,69 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ButterDog Chat</title>
-  
-  <!-- Preloading -->
-  <link rel="preload" href="img/Logo-icon.png" as="image">
-  <link rel="preload" href="img/Logo-wide.png" as="image">
-  <link rel="preload" href="css/themes/Abyss.css" as="style"> <!-- Default theme -->
-  <link rel="preload" href="css/chat.css" as="style">
-  
-  <link rel="icon" type="image/png" href="img/Logo-icon.png">
-  <link rel="stylesheet" href="css/chat.css">
+    <title>Chat</title>
+    <link rel="stylesheet" href="./css/chat.css">
+    <link rel="shortcut icon" href="./favicon.ico">
 </head>
 
 <body>
-  <nav>
-    <img src="img/Logo-wide.png" alt="ButterDog Chat Logo" class="logo">
-    <div class="channels">
-      <h2>Channels & Users</h2>
-      <button class="channel-button active" data-room="global" onclick="switchRoom('global')">Global</button>
-      <!-- Other users, and group chats will be shown here -->
-    </div>
-    <div id="user-info" class="user-info">
-      <span id="username">
-        <%= username %>
-      </span>
-      <button id="logout-button" onclick="userLogout()">Logout</button>
-    </div>
-  </nav>
-  <main>
-    <div id="chat-container" class="chat-container">
-      <div id="messages-container" class="messages-container"></div>
-    </div>
-    <form id="message-form" class="message-form">
-      <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required />
-      <button type="submit">Send</button>
-    </form>
-  </main>
+    <main class="container" id="main-container">
+        <section class="sidebar-container">
+            <button id="new-conversation-button">Search Users</button>
+            <ul class="conversations" id="conversation-list"></ul>
+            <div class="account">
+                <button onclick="logout()">Logout</button>
+            </div>
+        </section>
+        <section class="content-container">
+            <h2 id="conversation-title">No active conversation</h2>
+            <div class="messages" id="message-container"></div>
+        </section>
+        <section class="input-container">
+            <form class="form" id="input-form">
+                <input
+                    type="text" 
+                    placeholder="Enter message" 
+                    class="message-input text-input" 
+                    id="message-input"
+                    autocomplete="off"
+                >
+                <button type="submit" id="send-button">Send</button>
+            </form>
+        </section>
+    </main>
 
-  <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>
-    eruda.init();
-  </script> -->
-  
-  <!-- EJS Variables -->
-  <script>
-    const username = "<%= username %>";
-    const userUUID = "<%= uuid %>";
-  </script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="js/chat.js"></script>
+    <div class="modal" id="new-conversation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Conversation</h3>
+                <button class="close-button" id="close-conversation-modal-button">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <input 
+                    class="text-input"
+                    type="text"
+                    id="user-search-input"
+                    placeholder="Search for a user"
+                    autocomplete="off"
+                >
+
+                <div id="user-search-results" class="search-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = {
+            id: '<%= user.id %>',
+            username: '<%= user.username %>'
+        }
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 
 </html>

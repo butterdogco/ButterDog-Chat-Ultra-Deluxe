@@ -1,68 +1,53 @@
 const express = require('express');
 const router = express.Router();
 
-// Root route
+// Middleware to check if user is authenticated
+const requireAuth = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.redirect('/login');
+    }
+    next();
+}
+
+const redirectIfAuth = (req, res, next) => {
+    if (req.session.userId) {
+        return res.redirect('/chat');
+    }
+    next();
+}
+
+// GET / -> Shows login when unauthenticated, otherwise chat
 router.get('/', (req, res) => {
-  if (req.session.userId) {
-    console.log("User is authenticated, rendering chat page");
-    return res.redirect('/chat');
-  } else {
-    console.log("User not authenticated, redirecting to login");
-    res.redirect('/login');
-  }
-});
-
-// Chat page
-router.get('/chat', (req, res) => {
-  if (req.session.userId) {
-    res.render("chat", { username: req.session.username, uuid: req.session.uuid });
-  } else {
-    console.log("User not authenticated, redirecting to login");
-    res.redirect('/login');
-  }
-});
-
-// Login page
-router.get('/login', (req, res) => {
-  if (req.session.userId) {
-    console.log("User already authenticated, redirecting to chat");
-    return res.redirect('/chat');
-  }
-  console.log("User not authenticated, rendering login page");
-  res.render("login", { error: null });
-});
-
-// Signup page
-router.get('/signup', (req, res) => {
-  if (req.session.userId) {
-    console.log("User already authenticated, redirecting to chat");
-    return res.redirect('/chat');
-  }
-  console.log("User not authenticated, rendering signup page");
-  res.render("signup", { error: null });
-});
-
-// Logout
-router.get('/logout', (req, res) => {
-  if (req.session) {
-    // Destroy session
-    req.session.destroy(err => {
-      if (err) {
-        console.error("Error destroying session:", err);
-      } else {
-        console.log("Session destroyed, redirecting to login");
+    if (req.session.userId) {
+        res.redirect('/chat');
+    } else {
         res.redirect('/login');
-      }
+    }
+});
+
+// GET /login
+router.get('/login', redirectIfAuth, (req, res) => {
+    res.render('login');
+});
+
+// GET /signup
+router.get('/signup', redirectIfAuth, (req, res) => {
+    res.render('signup');
+});
+
+// GET /chat
+router.get('/chat', requireAuth, (req, res) => {
+    res.render('chat', {
+        user: {
+            id: req.session.userId,
+            username: req.session.username
+        }
     });
-  } else {
-    res.redirect('/login');
-  }
 });
 
 // 404 handler
 router.use((req, res) => {
-  console.log("404 Not Found:", req.originalUrl);
-  res.status(404).render("404");
+    res.status(404).render('404');
 });
 
 module.exports = router;

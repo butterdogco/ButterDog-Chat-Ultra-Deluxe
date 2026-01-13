@@ -1,82 +1,117 @@
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const User = require('../models/User');
 
-// Sign up
+const router = express.Router();
+
+// POST /auth/signup -> 
 router.post('/signup', async (req, res) => {
-  // Request validation
-  if (!req.body) {
-    return res.status(400).render("signup", { error: "Invalid request" });
-  }
-  if (!req.body.username || !req.body.password) {
-    return res.status(400).render("signup", { error: "Username and password are required" });
-  }
-  if (req.body.username.length > 24) {
-    return res.status(400).render("signup", { error: "Username must be 24 characters or less" });
-  }
-  if (req.body.password.length < 6) {
-    return res.status(400).render("signup", { error: "Password must be at least 6 characters" });
-  }
+    try {
+        const { username, password } = req.body;
 
-  const { username, password } = req.body;
+        // Validation
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
 
-  try {
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const uuid = crypto.randomUUID();
-    const newUser = new User({ username, password: hashedPassword, createdAt: new Date(), uuid: uuid });
-    await newUser.save();
-    
-    req.session.uuid = uuid; // Store unique user UUID in session
-    req.session.userId = newUser._id; // Store user ID in session
-    req.session.username = newUser.username; // Store username in session
-    res.redirect('/chat');
-  } catch (err) {
-    console.error("Error during signup:", err);
-    if (err.code === 11000) { // Duplicate username error
-      return res.status(400).render("signup", { error: "Username already taken" });
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        // Check if user exists
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username already exists' });
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // Create user
+        const colorHue = Math.floor(Math.random() * 360);
+        const user = new User({ username, passwordHash, colorHue });
+        await user.save();
+
+        // Create session
+        req.session.userId = user._id;
+        req.session.username = user.username;
+
+        res.status(201).json({
+            message: 'User created',
+            user: {
+                id: user._id,
+                username: user.username,
+                colorHue: user.colorHue,
+                about: user.about
+            }
+        });
+    } catch(err) {
+        console.error('Signup error:', err);
+        res.status(500).json({ error: 'Server error. Please try again later.' });
     }
-    res.status(400).render("signup", { error: "Username already taken" });
-  }
 });
 
-// Log in
+// POST /auth/login -> 
 router.post('/login', async (req, res) => {
-  // Request validation
-  if (!req.body) {
-    return res.status(400).render("login", { error: "Invalid request" });
-  }
-  if (!req.body.username || !req.body.password) {
-    return res.status(400).render("login", { error: "Username and password are required" });
-  }
-  const { username, password } = req.body;
-  
-  try {
-    const user = await User.findOne({ username });
+    try {
+        const { username, password } = req.body;
 
-    if (!user) {
-      console.log("User not found:", username);
-      return res.status(400).render("login", { error: "Invalid username or password" });
-    }
+        // Find user
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log("Invalid password for user:", username);
-      return res.status(400).render("login", { error: "Invalid username or password" });
-    } else {
-      req.session.uuid = user.uuid; // Store unique user UUID in session
-      req.session.userId = user._id; // Store user ID in session
-      req.session.username = user.username; // Store username in session
-      console.log(req.session.userId != null ? "Session userId set" : "Session userId not set");
-      console.log("User logged in successfully:", username);
-      res.redirect('/chat');
+        // Verify password
+        const isValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Update online status
+        user.online = true;
+        await user.save();
+
+        // Create session
+        req.session.userId = user._id;
+        req.session.username = user.username;
+
+        res.json({
+            message: 'Login successful',
+            user: {
+                id: user._id,
+                username: user.username,
+                colorHue: user.colorHue,
+                about: user.about
+            }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error. Please try again later.' });
     }
-  } catch (err) {
-    console.error("Error during login:", err);
-    res.status(500).render("login", { error: "Server error" });
-  }
+});
+
+// POST /auth/logout -> Logs a user out of their active session
+router.post('/logout', async (req, res) => {
+    try {
+        if (req.session.userId) {
+            // Update user status
+            await User.findByIdAndUpdate(req.session.userId, {
+                online: false,
+                lastSeen: new Date()
+            });
+        }
+
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Logout failed. Please try again later.'});
+            }
+        });
+        res.json({ message: 'Logged out successfully' });
+    } catch (err) {
+        console.error('Logout error', err);
+        return res.status(500).json({ error: 'Server error. Please try again later.' });
+    }
 });
 
 module.exports = router;

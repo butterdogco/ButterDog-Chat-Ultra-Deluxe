@@ -1,0 +1,33 @@
+@import url('global.css');
+
+main {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    .container {
+        width: 500px;
+        height: 400px;
+        background-color: var(--background-color-secondary);
+        border-radius: 12px;
+        border: var(--border-seperator);
+        padding: var(--container-inner-padding);
+
+        .header {
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+
+            .error {
+                color: var(--red-color);
+            }
+        }
+    }
+}

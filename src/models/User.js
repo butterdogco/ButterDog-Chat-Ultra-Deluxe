@@ -1,29 +1,13 @@
-const { create } = require('connect-mongo');
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  uuid: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  online: {
-    type: Boolean,
-    default: false
-  }
+const UserSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true, index: true },
+    passwordHash: { type: String, required: true, }, // bcrypt hash
+    colorHue: { type: Number, default: 200 }, // 0 - 360 for profile color
+    about: { type: String, default: 'Hi guys' },
+    joinedAt: { type: Date, default: Date.now }, // join/creation date
+    lastSeen: { type: Date, default: null }, // last online date
+    online: { type: Boolean, default: false } // online status
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', UserSchema);
