@@ -232,7 +232,7 @@ function renderMemberList() {
                     ${statusDot}
                 </div>
                 <div class="user-info">
-                    <span class="username">${user.username}</span>
+                    <span class="username">${user.username}${user.bot === true ? ' - BOT' : ''}</span>
                 </div>
             `;
 
@@ -431,7 +431,7 @@ function appendMessage(msg) {
         ` : ''}
         <div class="message-details">
             ${!isSystemMessage ? `
-            <div class="message-info"><span class="sender">${msg.sender.username}</span> - ${formatTime(msg.createdAt)}${msg.edited ? ' (edited)' : ''}</div>
+            <div class="message-info"><span class="sender">${msg.sender.username}</span> - ${msg.sender.bot === true ? 'BOT - ' : ''}${formatTime(msg.createdAt)}${msg.edited ? ' (edited)' : ''}</div>
             `: ''}
             <div class="message-text">${escapeHtml(msg.text)}</div>
         </div>

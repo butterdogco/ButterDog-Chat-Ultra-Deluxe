@@ -30,6 +30,7 @@ module.exports = (io) => {
         Conversation.find({ members: userId })
             .then(conversations => {
                 conversations.forEach(convo => {
+                    console.log(`Joining user ${userId} to conversation room: convo_${convo._id}`);
                     socket.join(`convo_${convo._id}`);
                 });
             })
@@ -103,7 +104,7 @@ module.exports = (io) => {
                     });
 
                     // Include basic user data before sending to clients
-                    await conversation.populate('members', 'username colorHue online');
+                    await conversation.populate('members', 'username colorHue online bot');
                 } else {
                     socket.emit('error', { message: 'Invalid data type' });
                     return;
@@ -130,6 +131,8 @@ module.exports = (io) => {
                 // Verify user is a member
                 const conversation = await Conversation.findById(conversationId);
                 if (!conversation || !conversation.members.includes(userId)) {
+                    console.warn(`User ${userId} attempted to send message to conversation ${conversationId} without access`);
+                    console.warn(`Conversation exists: ${!!conversation}, user is member: ${conversation ? conversation.members.includes(userId) : 'N/A'}`);
                     socket.emit('error', { message: 'Access denied' });
                     return;
                 }
@@ -142,7 +145,7 @@ module.exports = (io) => {
                 });
 
                 await message.save();
-                await message.populate('sender', 'username colorHue');
+                await message.populate('sender', 'username colorHue bot');
 
                 // Update conversation
                 conversation.lastMessage = {
@@ -191,7 +194,7 @@ module.exports = (io) => {
                 message.text = cleanedText;
                 message.edited = true;
                 await message.save();
-                await message.populate('sender', 'username colorHue');
+                await message.populate('sender', 'username colorHue bot');
 
                 // Broadcast update
                 io.to(`convo_${message.conversation}`).emit('message:edited', message);
