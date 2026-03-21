@@ -1,13 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
-    --primary-color: #2c2c4e;
-    --secondary-color: #1e1c2e;
+    --primary-color: #575788;
+    --secondary-color: #474368;
+    --tertiary-color: #929ab4;
+
+    --red-color: #e04c4c;
+    --blue-color: #6eceeb;
 
     --border-seperator: 2px solid #585858;
 
     --background-primary-color: #030324;
     --background-secondary-color: #080828;
+    --background-tertiary-color: #282941;
 
     --text-primary-color: #eee;
     --text-secondary-color: #aaa;
@@ -16,6 +21,13 @@
     --font-body: var(--font-header);
 
     --container-inner-padding: 12px;
+
+    --item-padding-small: 4px;
+    --item-padding-medium: 8px;
+
+    --item-gap-small: 4px;
+    --item-gap-medium: 6px;
+    --item-gap-large: 12px;
 }
 
 html,
@@ -35,39 +47,55 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-header);
 }
 
+hr {
+    width: 100%;
+}
+
+.material-symbols-rounded {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
 .user-tile {
     display: flex;
     flex-direction: row;
-    gap: 12px;
-    padding: 4px;
+    gap: var(--item-gap-large);
+    padding: var(--item-padding-small);
     font-size: 16px;
-    height: 42px;
+    height: 44px;
 
     .user-info {
         flex-grow: 1;
         height: min-content;
         align-self: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
 .user-avatar {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 8px;
+    padding: var(--item-padding-medium);
     border-radius: 50%;
-    width: 34px;
+    width: 36px;
     user-select: none;
-    text-shadow: 0 0 2px #00000023;
+    text-shadow: 0 0 4px #00000050;
     
     .status-dot {
         position: absolute;
         right: 0;
         bottom: 0;
-        width: 5px;
-        height: 5px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         background-color: #585858;
+        box-shadow: 0 0 4px #00000090;
 
         &.online {
             background-color: #77bb67;
@@ -76,21 +104,61 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-input {
-    padding: 4px;
+    padding: var(--item-padding-small);
     border-radius: 6px;
     background-color: var(--background-primary-color);
     color: var(--text-primary-color);
     font-size: 15px;
     border: none;
-    transition: 0.2s ease;
+    transition: 0.15s ease;
 
     &:focus {
         background-color: var(--secondary-color);
     }
 }
 
+.text-button {
+    padding: var(--item-padding-small);
+    border-radius: 6px;
+    background-color: var(--primary-color);
+    color: var(--text-primary-color);
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: 0.15s ease;
+
+    &:hover,
+    &:focus {
+        background-color: var(--secondary-color);
+    }
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--item-padding-small);
+    border-radius: 50%;
+    aspect-ratio: 1/1;
+    border: none;
+    font-size: 16px;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    background-color: transparent;
+    transition: 0.2s ease;
+
+    &:hover,
+    &:focus {
+        background-color: var(--primary-color);
+        color: var(--text-primary-color);
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 1;
+        }
+    }
+}
+
 .close-button {
-    padding: 4px;
+    padding: var(--item-padding-small);
     border-radius: 50%;
     aspect-ratio: 1/1;
     border: none;

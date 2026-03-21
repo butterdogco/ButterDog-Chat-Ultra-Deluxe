@@ -1,5 +1,8 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
+
+const constants = path.join(__dirname, '../constants.js');
 
 // Middleware to check if user is authenticated
 const requireAuth = (req, res, next) => {
@@ -40,10 +43,16 @@ router.get('/chat', requireAuth, (req, res) => {
     res.render('chat', {
         user: {
             id: req.session.userId,
-            username: req.session.username
+            username: req.session.username,
+            colorHue: req.session.colorHue
         }
     });
 });
+
+// GET /constants
+router.get('/constants', (req, res) => {
+    res.sendFile(constants);
+})
 
 // 404 handler
 router.use((req, res) => {

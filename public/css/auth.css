@@ -9,20 +9,33 @@ main {
     overflow: hidden;
 
     .container {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-self: center;
         width: 500px;
-        height: 400px;
-        background-color: var(--background-color-secondary);
+        background-color: var(--background-tertiary-color);
         border-radius: 12px;
         border: var(--border-seperator);
         padding: var(--container-inner-padding);
 
         .header {
-            margin: 0;
+            display: flex;
+            flex-direction: column;
+
+            h1,
+            p {
+                margin: 0;
+            }
+
+            a {
+                color: var(--blue-color);
+            }
         }
 
         form {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             gap: 6px;
 
             .error {

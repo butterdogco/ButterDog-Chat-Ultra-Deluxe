@@ -8,8 +8,9 @@ const ConversationSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
     lastMessage: {
         text: String,
-        sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' }
-    }
+        sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    colorHue: { type: Number } // used for group chats
 });
 
 module.exports = mongoose.model('Conversation', ConversationSchema);

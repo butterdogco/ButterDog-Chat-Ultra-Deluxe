@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
-    <title>Signup - ButterDog Chat</title>
+    <title>Sign up - ButterDog Chat</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Signup for ButterDog Chat">
-    <meta name="og:description" content="Signup for ButterDog Chat">
+    <meta name="description" content="Sign up for ButterDog Chat">
+    <meta name="og:description" content="Sign up for ButterDog Chat">
     <meta name="author" content="ButterDogCo">
     <link rel="stylesheet" href="./css/auth.css">
     <link rel="shortcut-icon" href="./favicon.ico">
@@ -15,7 +15,11 @@
 <body>
     <main>
         <div class="container">
-            <h1 class="header">Signup</h1>
+            <div class="header">
+                <h1>Sign up</h1>
+                <p><a href="./login">Log in</a> instead?</p>
+            </div>
+            <hr>
 
             <form>
                 <label for="username-input">Username</label>
@@ -24,7 +28,7 @@
                 <input class="text-input" type="password" placeholder="Enter password" id="password-input">
                 <label for="confirm-password-input">Confirm Password</label>
                 <input class="text-input" type="password" placeholder="Enter password again" id="confirm-password-input">
-                <button type="submit" onclick="signup(event)">Signup</button>
+                <button class="text-button" type="submit" onclick="signup(event)">Signup</button>
                 <div class="error" id="error-message"></div>
             </form>
         </div>

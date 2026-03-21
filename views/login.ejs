@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
-    <title>Login - ButterDog Chat</title>
+    <title>Log in - ButterDog Chat</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login to ButterDog Chat">
-    <meta name="og:description" content="Login to ButterDog Chat">
+    <meta name="description" content="Log in to ButterDog Chat">
+    <meta name="og:description" content="Log in to ButterDog Chat">
     <meta name="author" content="ButterDogCo">
     <link rel="stylesheet" href="./css/auth.css">
     <link rel="shortcut-icon" href="./favicon.ico">
@@ -15,14 +15,19 @@
 <body>
     <main>
         <div class="container">
-            <h1 class="header">Login</h1>
+            <div class="header">
+                <h1>Log in</h1>
+                <p><a href="./signup">Sign up</a> instead?</p>
+            </div>
+
+            <hr>
 
             <form>
                 <label for="username-input">Username</label>
                 <input class="text-input" type="text" placeholder="Enter username" id="username-input">
                 <label for="password-input">Password</label>
                 <input class="text-input" type="password" placeholder="Enter password" id="password-input">
-                <button type="submit" onclick="login(event)">Login</button>
+                <button class="text-button" type="submit" onclick="login(event)">Login</button>
                 <div class="error" id="error-message"></div>
             </form>
         </div>

@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
+const { isValidObjectId } = require("mongoose");
 
 const router = express.Router();
 
@@ -12,55 +13,84 @@ const requireAuth = (req, res, next) => {
     next();
 }
 
+/**
+ * 
+ * @param {string} userId 
+ * @returns 
+ */
+async function getUserById(userId) {
+    const user = await User.findById(userId)
+        .select('-passwordHash');
+    
+    if (!user) {
+        return null;
+    }
+
+    return user;
+}
+
+/**
+ * Finds a user with the provided id and updates their values with the passed updates object
+ * @param {string} userId 
+ * @param {Object} updates 
+ * @returns {Promise<User> | Error} A User object without the passwordHash
+ */
+async function updateUserProfile(userId, updates) {
+    if (!updates) {
+        return;
+    }
+
+    const about = updates.about;
+    if (about !== undefined && about.length > 400) {
+        return new Error('about must be less than 400 characters');
+    }
+
+    const colorHue = updates.colorHue;
+    if (colorHue !== undefined && colorHue < 0 && colorHue > 360) {
+        return new Error('colorHue must be between 0 and 360');
+    }
+
+    return await User.findByIdAndUpdate(
+        userId,
+        updates,
+        { new: true }
+    ).select('-passwordHash');
+}
+
 // Apply auth to all API routes
 router.use(requireAuth);
 
 // GET /api/users/:id/profile -> Returns the profile of the provided user
 router.get('/users/:id/profile', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id)
-            .select('-passwordHash');
-        
-        if (!user) {
+        const user = await getUserById(req.params.id);
+        if (user !== undefined) {
+            return res.status(200).json({ user });
+        } else {
             return res.status(404).json({ error: 'User not found' });
         }
-
-        res.json({
-            username: user.username,
-            colorHue: user.colorHue,
-            about: user.about,
-            joinedAt: user.joinedAt,
-            online: user.online,
-            lastSeen: user.lastSeen
-        });
     } catch (err) {
         console.error('GET users/:id/profile error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// PATCH /api/users/me -> Updates own profile with the provided details
+// PATCH /api/users/me -> Updates own profile with the provided details (NOT TESTED - UNUSED BY CLIENT)
 router.patch('/users/me', async (req, res) => {
     try {
+        // Limit updates to about and colorHue
         const { about, colorHue } = req.body;
-        const updates = {};
+        const userId = req.session.id;
 
-        if (about !== undefined) updates.about = about;
-        if (colorHue !== undefined) {
-            // Validate
-            if (colorHue < 0 || colorHue > 360) {
-                return res.status(400).json({ error: 'colorHue must be between 0 and 360' });
-            }
-            updates.colorHue = colorHue;
+        const user = await updateUserProfile(userId, {
+            about, colorHue
+        });
+
+        if (typeof(user) !== 'Error') {
+            return res.status(200).json(user);
+        } else {
+            return res.status(500)
         }
-
-        const user = await User.findByIdAndUpdate(
-            req.session.userId,
-            updates,
-            { new: true }
-        ).select('-passwordHash');
-
-        res.json(user);
     } catch (err) {
         console.error('PATCH users/me error:', err);
         res.status(500).json({ error: 'Server error' });
@@ -120,8 +150,18 @@ router.post('/conversations', async (req, res) => {
             });
 
             if (existingDM) {
-                console.log("existing DM");
+                await existingDM.populate('members', 'username colorHue online');
                 return res.json(existingDM);
+            }
+        } else {
+            const existingGroup = await Conversation.findOne({
+                type: 'group',
+                members: { $all: allMembers }
+            });
+            
+            if (existingGroup) {
+                await existingGroup.populate('members', 'username colorHue online');
+                return res.json(existingGroup);
             }
         }
 
@@ -151,14 +191,15 @@ router.get('/conversations', async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
 
+        // Find the conversation
         const conversations = await Conversation.find({
             members: currentUserId
         })
-            .populate('members', 'username colorHue online lastSeen')
-            .populate('lastMessage.sender', 'username')
-            .sort({ updatedAt: -1 })
-            .skip(skip)
-            .limit(limit);
+            .populate('members', 'username colorHue online lastSeen') // Include additional member info
+            .populate('lastMessage.sender', 'username') // Include the sender's username of the last message
+            .sort({ updatedAt: -1 }) // Sort by newest first
+            .skip(skip) // Skip (for pages)
+            .limit(limit); // Limit (for pages)
 
         res.json(conversations);
     } catch(err) {
@@ -174,6 +215,11 @@ router.get('/conversations/:id/messages', async (req, res) => {
         const currentUserId = req.session.userId;
         const limit = parseInt(req.query.limit) || 20;
         const before = req.query.before; // timestamp or messageId
+
+        // Verify if the conversation id is valid
+        if (conversationId === undefined || !isValidObjectId(conversationId)) {
+            return res.status(400).json({ error: 'Missing or invalid conversation id' });
+        }
 
         // Verify user is a member of the conversation
         const conversation = await Conversation.findById(conversationId);
@@ -255,6 +301,36 @@ router.post('/conversations/:id/messages', async (req, res) => {
     }
 });
 
+// POST /api/conversations/:id/users -> Adds the provided members to the conversation
+router.post('/conversations/:id/users', async (req, res) => {
+    try  {
+        const conversationId = req.params.id;
+        const { memberIds } = req.body;
+        const currentUserId = req.session.userId;
+
+        // Validate
+        if (!type || !memberIds || !Array.isArray(memberIds)) {
+            return res.status(400).json({ error: 'Invalid request' });
+        }
+
+        // Verify the user is a member
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation || !conversation.members.includes(currentUserId)) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        const members = await User.find({ _id: { $in: memberIds }});
+        if (members.length < 1) {
+            return res.status(400).json({ error: 'Failed to find members with the provided IDs' });
+        }
+
+        conversation.members.push(...memberIds);
+    } catch (err) {
+        console.error('POST conversations/:id/users error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // PATCH /api/messages/:id -> Edits the provided message
 router.patch('/messages/:id', async (req, res) => {
     try {
@@ -262,10 +338,12 @@ router.patch('/messages/:id', async (req, res) => {
         const currentUserId = req.session.userId;
         const { text } = req.body;
 
+        // Check text length
         if (!text || text.trim().length === 0) {
             return res.status(400).json({ error: 'Message text is required' });
         }
 
+        // Check existence
         const message = await Message.findById(messageId);
         if (!message) {
             return res.status(404).json({ error: 'Message not found' });
@@ -302,6 +380,7 @@ router.delete('/messages/:id', async (req, res) => {
 
         const message = await Message.findById(messageId);
 
+        // Check message existence
         if (!message) {
             return res.status(404).json({ error: 'Message not found' });
         }

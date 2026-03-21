@@ -22,9 +22,11 @@ const app = express();
 const serverInstance = http.createServer(app);
 const io = socketIO(serverInstance);
 
+const mongoURI = process.env.MONGO_URI_LOCAL || process.env.MONGO_URI;
+
 async function startServer() {
     // DB Connection
-    await mongoose.connect(process.env.MONGO_URI_LOCAL, {
+    await mongoose.connect(mongoURI, {
         serverSelectionTimeoutMS: 5000
     });
     
@@ -62,7 +64,7 @@ async function startServer() {
     setupChatSocket(io);
     
     serverInstance.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        console.log(`Server running on port ${PORT}\n\thttp://localhost:${PORT}/`);
     });
 }
 
