@@ -4,7 +4,6 @@
  * @typedef {Object} User
  * @property {string} username
  * @property {number} colorHue
- * @property {string} about
  * @property {Date} joinedAt
  * @property {Date} lastSeen
  * @property {boolean} online
