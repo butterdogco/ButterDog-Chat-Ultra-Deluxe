@@ -186,7 +186,7 @@ async function selectConversation(conversationId) {
         });
     }
 
-    mainContainer.classList.toggle('active-conversation', conversation != null);
+    mainContainer.classList.toggle('active-conversation', currentConversationId != null);
 }
 
 // Load messages
