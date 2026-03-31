@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const { isValidObjectId } = require("mongoose");
+const constants = require("../constants");
 
 const router = express.Router();
 
@@ -13,89 +14,8 @@ const requireAuth = (req, res, next) => {
     next();
 }
 
-/**
- * 
- * @param {string} userId 
- * @returns 
- */
-async function getUserById(userId) {
-    const user = await User.findById(userId)
-        .select('-passwordHash');
-    
-    if (!user) {
-        return null;
-    }
-
-    return user;
-}
-
-/**
- * Finds a user with the provided id and updates their values with the passed updates object
- * @param {string} userId 
- * @param {Object} updates 
- * @returns {Promise<User> | Error} A User object without the passwordHash
- */
-async function updateUserProfile(userId, updates) {
-    if (!updates) {
-        return;
-    }
-
-    const about = updates.about;
-    if (about !== undefined && about.length > 400) {
-        return new Error('about must be less than 400 characters');
-    }
-
-    const colorHue = updates.colorHue;
-    if (colorHue !== undefined && colorHue < 0 && colorHue > 360) {
-        return new Error('colorHue must be between 0 and 360');
-    }
-
-    return await User.findByIdAndUpdate(
-        userId,
-        updates,
-        { new: true }
-    ).select('-passwordHash');
-}
-
 // Apply auth to all API routes
 router.use(requireAuth);
-
-// GET /api/users/:id/profile -> Returns the profile of the provided user
-router.get('/users/:id/profile', async (req, res) => {
-    try {
-        const user = await getUserById(req.params.id);
-        if (user !== undefined) {
-            return res.status(200).json({ user });
-        } else {
-            return res.status(404).json({ error: 'User not found' });
-        }
-    } catch (err) {
-        console.error('GET users/:id/profile error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// PATCH /api/users/me -> Updates own profile with the provided details (NOT TESTED - UNUSED BY CLIENT)
-router.patch('/users/me', async (req, res) => {
-    try {
-        // Limit updates to about and colorHue
-        const { about, colorHue } = req.body;
-        const userId = req.session.id;
-
-        const user = await updateUserProfile(userId, {
-            about, colorHue
-        });
-
-        if (typeof(user) !== 'Error') {
-            return res.status(200).json(user);
-        } else {
-            return res.status(500)
-        }
-    } catch (err) {
-        console.error('PATCH users/me error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
 
 // GET /api/users/search?q=username -> Returns an array of users
 router.get('/users/search', async (req, res) => {
@@ -112,73 +32,12 @@ router.get('/users/search', async (req, res) => {
             username: { $regex: query, $options: 'i' },
             _id: { $ne: currentUserId }
         })
-            .select('username colorHue online')
+            .select(constants.USER_PUBLIC_PROPERTIES)
             .limit(10);
         
         res.json(users);
     } catch (err) {
         console.error('User search error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// POST /api/conversations -> Creates a conversation with the provided details
-router.post('/conversations', async (req, res) => {
-    try {
-        const { type, memberIds, name } = req.body;
-        const currentUserId = req.session.userId;
-
-        // Validate
-        if (!type || !memberIds || !Array.isArray(memberIds)) {
-            return res.status(400).json({ error: 'Invalid request' });
-        }
-
-        // Add current user to members if not included
-        const allMembers = [... new Set([currentUserId, ... memberIds])];
-        console.log("New convo:", allMembers, type, memberIds, name);
-
-        // For DMs, check if the conversation already exists
-        if (type === 'dm') {
-            if (allMembers.length !== 2) {
-                return res.status(400).json({ error: 'DM must have exactly 2 members' });
-            }
-
-            // Check for existing DM
-            const existingDM = await Conversation.findOne({
-                type: 'dm',
-                members: { $all: allMembers, $size: 2 }
-            });
-
-            if (existingDM) {
-                await existingDM.populate('members', 'username colorHue online');
-                return res.json(existingDM);
-            }
-        } else {
-            const existingGroup = await Conversation.findOne({
-                type: 'group',
-                members: { $all: allMembers }
-            });
-            
-            if (existingGroup) {
-                await existingGroup.populate('members', 'username colorHue online');
-                return res.json(existingGroup);
-            }
-        }
-
-        // Create new conversation
-        const conversation = new Conversation({
-            type,
-            members: allMembers,
-            name: type === 'group' ? name : ''
-        });
-
-        await conversation.save();
-        await conversation.populate('members', 'username colorHue online');
-
-        console.log("new convo")
-        res.status(201).json(conversation);
-    } catch (err) {
-        console.error('POST conversations error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -195,7 +54,7 @@ router.get('/conversations', async (req, res) => {
         const conversations = await Conversation.find({
             members: currentUserId
         })
-            .populate('members', 'username colorHue online lastSeen') // Include additional member info
+            .populate('members', constants.USER_CONVERSATION_PUBLIC_PROPERTIES) // Include additional member info
             .populate('lastMessage.sender', 'username') // Include the sender's username of the last message
             .sort({ updatedAt: -1 }) // Sort by newest first
             .skip(skip) // Skip (for pages)
@@ -246,157 +105,13 @@ router.get('/conversations/:id/messages', async (req, res) => {
         }
 
         const messages = await Message.find(query)
-            .populate('sender', 'username colorHue')
+            .populate('sender', constants.USER_MESSAGE_PUBLIC_PROPERTIES)
             .sort({ createdAt: -1 })
             .limit(limit);
 
         res.json(messages.reverse()); // Return oldest first for display
     } catch (err) {
         console.error('GET conversations/:id/messages error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// POST /api/conversations/:id/messages -> Creates a message in the provided conversation
-router.post('/conversations/:id/messages', async (req, res) => {
-    try {
-        const conversationId = req.params.id;
-        const currentUserId = req.session.userId;
-        const { text } = req.body;
-
-        if (!text || text.trim().length === 0) {
-            return res.status(400).json({ error: 'Message text required' });
-        }
-
-        // Verify the user is a member
-        const conversation = await Conversation.findById(conversationId);
-        if (!conversation || !conversation.members.includes(currentUserId)) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Create message
-        const message = new Message({
-            conversation: conversationId,
-            sender: currentUserId,
-            text: text.trim()
-        });
-
-        await message.save();
-        await message.populate('sender', 'username colorHue');
-
-        // Update conversation's lastMessage
-        conversation.lastMessage = {
-            text: message.text,
-            sender: currentUserId,
-            createdAt: message.createdAt,
-            messageId: message._id
-        };
-        conversation.updatedAt = new Date();
-        await conversation.save();
-
-        res.status(201).json(message);
-    } catch (err) {
-        console.error('POST conversations/:id/messages error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// POST /api/conversations/:id/users -> Adds the provided members to the conversation
-router.post('/conversations/:id/users', async (req, res) => {
-    try  {
-        const conversationId = req.params.id;
-        const { memberIds } = req.body;
-        const currentUserId = req.session.userId;
-
-        // Validate
-        if (!type || !memberIds || !Array.isArray(memberIds)) {
-            return res.status(400).json({ error: 'Invalid request' });
-        }
-
-        // Verify the user is a member
-        const conversation = await Conversation.findById(conversationId);
-        if (!conversation || !conversation.members.includes(currentUserId)) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        const members = await User.find({ _id: { $in: memberIds }});
-        if (members.length < 1) {
-            return res.status(400).json({ error: 'Failed to find members with the provided IDs' });
-        }
-
-        conversation.members.push(...memberIds);
-    } catch (err) {
-        console.error('POST conversations/:id/users error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// PATCH /api/messages/:id -> Edits the provided message
-router.patch('/messages/:id', async (req, res) => {
-    try {
-        const messageId = req.params.id;
-        const currentUserId = req.session.userId;
-        const { text } = req.body;
-
-        // Check text length
-        if (!text || text.trim().length === 0) {
-            return res.status(400).json({ error: 'Message text is required' });
-        }
-
-        // Check existence
-        const message = await Message.findById(messageId);
-        if (!message) {
-            return res.status(404).json({ error: 'Message not found' });
-        }
-
-        // Check ownership
-        if (message.sender.toString() !== currentUserId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Check 5-minute edit window
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        if (message.createdAt < fiveMinutesAgo) {
-            return res.status(403).json({ error: 'Edit window expired' });
-        }
-
-        message.text = text.trim();
-        message.edited = true;
-        await message.save();
-        await message.populate('sender', 'username colorHue');
-
-        res.json(message);
-    } catch (err) {
-        console.error('PATCH message/:id error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// DELETE /api/messages/:id -> Deletes the provided message
-router.delete('/messages/:id', async (req, res) => {
-    try {
-        const messageId = req.params.id;
-        const currentUserId = req.session.userId;
-
-        const message = await Message.findById(messageId);
-
-        // Check message existence
-        if (!message) {
-            return res.status(404).json({ error: 'Message not found' });
-        }
-
-        // Check ownership
-        if (message.sender.toString() !== currentUserId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        message.deleted = true;
-        message.text = '[deleted]';
-        await message.save();
-
-        res.json({ message: 'Message deleted' });
-    } catch (err) {
-        console.error('DELETE messages/:id error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
