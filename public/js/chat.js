@@ -186,7 +186,7 @@ async function selectConversation(conversationId) {
         });
     }
 
-    mainContainer.classList.toggle('active-conversation', conversation !== null);
+    mainContainer.classList.toggle('active-conversation', conversation != null);
 }
 
 // Load messages
@@ -830,7 +830,7 @@ function setupModalEventListeners() {
                 }
             });
 
-            updateMembersInConversation(addedArray, currentConversationId);
+            updateMembersInConversation(addedArray);
         }
 
         setConversationModalVisible(false);

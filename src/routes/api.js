@@ -12,7 +12,7 @@ const requireAuth = (req, res, next) => {
         return res.status(401).json({ error: 'Authentication required' });
     }
     next();
-}
+};
 
 // Apply auth to all API routes
 router.use(requireAuth);

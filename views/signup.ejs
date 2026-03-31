@@ -9,7 +9,7 @@
     <meta name="og:description" content="Sign up for ButterDog Chat">
     <meta name="author" content="ButterDogCo">
     <link rel="stylesheet" href="./css/auth.css">
-    <link rel="shortcut-icon" href="./favicon.ico">
+    <link rel="shortcut icon" href="./favicon.ico">
 </head>
 
 <body>
@@ -23,11 +23,11 @@
 
             <form>
                 <label for="username-input">Username</label>
-                <input class="text-input" type="text" placeholder="Enter username" id="username-input">
+                <input class="text-input" type="text" placeholder="Enter username" id="username-input" autocomplete="username">
                 <label for="password-input">Password</label>
-                <input class="text-input" type="password" placeholder="Enter password" id="password-input">
+                <input class="text-input" type="password" placeholder="Enter password" id="password-input" autocomplete="new-password">
                 <label for="confirm-password-input">Confirm Password</label>
-                <input class="text-input" type="password" placeholder="Enter password again" id="confirm-password-input">
+                <input class="text-input" type="password" placeholder="Enter password again" id="confirm-password-input" autocomplete="new-password">
                 <button class="text-button" type="submit" onclick="signup(event)">Signup</button>
                 <div class="error" id="error-message"></div>
             </form>

@@ -82,13 +82,13 @@ module.exports = (io) => {
 
                 if (typeof(newData) === 'string') { // New name
                     editType = 'name';
-                    const shortenedName = newData.trim().slice(0, 23).trim(); // Limit to 24 characters, trim twice since we may encounter a space after slicing
+                    const shortenedName = newData.trim().slice(0, 24).trim(); // Limit to 24 characters, trim twice since we may encounter a space after slicing
                     conversation.name = shortenedName;
                 } else if (newData instanceof Array) { // Modified members
                     editType = 'members';
 
                     // Check if the user owns the conversation
-                    if (!conversation.members[0] === userId) {
+                    if (conversation.members[0] !== userId) {
                         socket.emit('error', { message: 'Access denied' });
                         return;
                     }
@@ -98,7 +98,7 @@ module.exports = (io) => {
                             conversation.members.push(userId);
                         } else {
                             const index = conversation.members.indexOf(userId);
-                            if (index) conversation.members.splice(index, 1);
+                            if (index !== -1) conversation.members.splice(index, 1);
                         }
                     });
 
@@ -168,7 +168,7 @@ module.exports = (io) => {
                 const { messageId, text } = data;
 
                 // Find the message and ensure it was sent by the user
-                const message =  await Message.findById(messageId);
+                const message = await Message.findById(messageId);
                 if (!message || message.sender._id.toString() !== userId.toString()) {
                     socket.emit('error', { message: 'Access denied' });
                     return;
@@ -220,7 +220,7 @@ module.exports = (io) => {
 
                 // Update conversation last message contents if that was the last message
                 const conversation = await Conversation.findById(message.conversation);
-                if (conversation && conversation.lastMessage === originalContents) {
+                if (conversation && conversation.lastMessage.text === originalContents) {
                     // At some point this could instead fetch the new last message and update accordingly
                     conversation.lastMessage.text = '[deleted]';
                 }
