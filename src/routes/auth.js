@@ -68,10 +68,6 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Update online status
-        user.online = true;
-        await user.save();
-
         // Create session
         req.session.userId = user._id;
         req.session.username = user.username;

@@ -5,26 +5,33 @@ const Conversation = require('../models/Conversation');
 const constants = require('../constants');
 const { isValidObjectId } = require('mongoose');
 
-// Store online users: userId -> socketId
-const onlineUsers = new Map();
-
 module.exports = (io) => {
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
         const session = socket.request.session;
+        const userId = session ? session.userId : null;
 
-        if (!session || !session.userId) {
+        // Ensure session and userId exist
+        if (!session || !userId) {
             socket.disconnect();
             return;
         }
 
-        const userId = session.userId;
+        // Ensure userId references a real user
+        const user = await User.findById(userId);
+        if (!user) {
+            socket.disconnect();
+            return;
+        }
+
         console.log(`User connected: ${userId}`);
 
-        // Track online user
-        onlineUsers.set(userId, socket.id);
-
         // Update user online status
-        User.findByIdAndUpdate(userId, { online: true }).catch(console.error);
+        user.online = true;
+        try {
+            await user.save();
+        } catch (err) {
+            console.error('Failed to save user when updating online status:', err);
+        }
 
         // Join user's conversation rooms
         Conversation.find({ members: userId })
@@ -253,17 +260,14 @@ module.exports = (io) => {
         // Handle disconnect
         socket.on('disconnect', async () => {
             console.log(`User disconnected: ${userId}`);
-            onlineUsers.delete(userId);
 
             try {
-                // Find the user and update status parameters
-                await User.findByIdAndUpdate(userId, {
-                    online: false,
-                    lastSeen: new Date()
-                });
-
                 // Broadcast user offline status
                 socket.broadcast.emit('user:offline', { userId });
+
+                // Find the user and update status parameters
+                user.online = false;
+                user.save();
             } catch (err) {
                 console.error('Error updating user status:', err);
             }
