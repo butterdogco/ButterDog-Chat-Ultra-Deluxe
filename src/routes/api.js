@@ -27,7 +27,7 @@ router.get('/users/search', async (req, res) => {
             return res.json([]);
         }
 
-        // Search for users (case-sensitive, partical match)
+        // Search for users (case-sensitive, partial match)
         const users = await User.find({
             username: { $regex: query, $options: 'i' },
             _id: { $ne: currentUserId }
@@ -42,13 +42,10 @@ router.get('/users/search', async (req, res) => {
     }
 });
 
-// GET /api/conversations -> Returns conversations the user is apart of (paginated)
+// GET /api/conversations -> Returns conversations the user is a part of
 router.get('/conversations', async (req, res) => {
     try {
         const currentUserId = req.session.userId;
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
 
         // Find the conversation
         const conversations = await Conversation.find({
@@ -56,9 +53,7 @@ router.get('/conversations', async (req, res) => {
         })
             .populate('members', constants.USER_CONVERSATION_PUBLIC_PROPERTIES) // Include additional member info
             .populate('lastMessage.sender', 'username') // Include the sender's username of the last message
-            .sort({ updatedAt: -1 }) // Sort by newest first
-            .skip(skip) // Skip (for pages)
-            .limit(limit); // Limit (for pages)
+            .sort({ updatedAt: -1 }); // Sort by newest first
 
         res.json(conversations);
     } catch(err) {
