@@ -37,14 +37,16 @@ module.exports = (io) => {
             console.error('Failed to save user when updating online status:', err);
         }
 
-        // Join user's conversation rooms
-        Conversation.find({ members: userId })
-            .then(conversations => {
-                conversations.forEach(convo => {
-                    socket.join(`convo_${convo._id}`);
-                });
-            })
-            .catch(console.error);
+        if (!socket.recovered) {
+            // Join user's conversation rooms
+            Conversation.find({ members: userId })
+                .then(conversations => {
+                    conversations.forEach(convo => {
+                        socket.join(`convo_${convo._id}`);
+                    });
+                })
+                .catch(console.error);
+        }
         
         // Broadcast user online status
         socket.broadcast.emit('user:online', { userId: userId });
