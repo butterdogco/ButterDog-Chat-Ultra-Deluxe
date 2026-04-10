@@ -10,8 +10,12 @@ module.exports = (io) => {
         const session = socket.request.session;
         const userId = session ? session.userId : null;
 
+        function isLoggedIn() {
+            return session !== null && session.userId !== null; 
+        }
+
         // Ensure session and userId exist
-        if (!session || !userId) {
+        if (!isLoggedIn()) {
             socket.disconnect();
             return;
         }
@@ -47,6 +51,11 @@ module.exports = (io) => {
 
         // Handle joining a specific conversation
         socket.on('conversation:join', async (conversationId) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             if (!isValidObjectId(conversationId)) {
                 socket.emit('error', { message: 'Invalid conversation id' });
                 return;
@@ -69,6 +78,11 @@ module.exports = (io) => {
 
         // Handle editing a group chat
         socket.on('conversation:edit', async (data) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             try {
                 const { conversationId, newData } = data;
 
@@ -131,6 +145,11 @@ module.exports = (io) => {
 
         // Handle new message
         socket.on('message:send', async (data) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             try {
                 const { conversationId, text } = data;
 
@@ -141,11 +160,18 @@ module.exports = (io) => {
                     return;
                 }
 
+                const maxMessageLength = consants.MESSAGE_MAX_LENGTH;
+                let trimmedText = text.trim().replace(/  +/g, ' '); // Trim trailing spaces, and replace duplicate spaces with just one
+                if (trimmedText.length > maxMessageLength) { // Trim if exceeds max length
+                    trimmedText = trimmedText.substring(0, maxMessageLength);
+                    socket.emit('error', { message: `Your message was trimmed due to exceeding the max message length of ${maxMessageLength} characters. If this continues to occur, please update/reload the application.` });
+                }
+
                 // Create message
                 const message = new Message({
                     conversation: conversationId,
                     sender: userId,
-                    text: text.trim().replace(/  +/g, ' ').substring(0, constants.MESSAGE_MAX_LENGTH)
+                    text: trimmedText
                 });
 
                 await message.save();
@@ -171,6 +197,11 @@ module.exports = (io) => {
 
         // Handle message edit
         socket.on('message:edit', async (data) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             try {
                 const { messageId, text } = data;
 
@@ -210,6 +241,11 @@ module.exports = (io) => {
 
         // Handle message delete
         socket.on('message:delete', async (messageId) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             try {
                 // Find the message and ensure it was sent by the user
                 const message = await Message.findById(messageId);
@@ -242,6 +278,11 @@ module.exports = (io) => {
 
         // Handle typing indicator
         socket.on('typing:start', (conversationId) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             // Emit the typing event
             socket.to(`convo_${conversationId}`).emit('user:typing', {
                 username: session.username,
@@ -250,6 +291,11 @@ module.exports = (io) => {
         });
 
         socket.on('typing:stop', (conversationId) => {
+            if (!isLoggedIn()) {
+                socket.emit('error', { message: 'You are not logged in.' });
+                return;
+            }
+            
             // Emit the stopped typing event
             socket.to(`convo_${conversationId}`).emit('user:stopped-typing', {
                 username: session.username,
