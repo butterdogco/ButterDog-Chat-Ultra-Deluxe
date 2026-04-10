@@ -164,7 +164,7 @@ module.exports = (io) => {
                 let trimmedText = text.trim().replace(/  +/g, ' '); // Trim trailing spaces, and replace duplicate spaces with just one
                 if (trimmedText.length > maxMessageLength) { // Trim if exceeds max length
                     trimmedText = trimmedText.substring(0, maxMessageLength);
-                    socket.emit('error', { message: `Your message was trimmed due to exceeding the max message length of ${maxMessageLength} characters. If this continues to occur, please update/reload the application.` });
+                    socket.emit('notice', { message: `Your message was trimmed due to exceeding the max message length of ${maxMessageLength} characters. If this continues to occur, please update/reload the application.` });
                 }
 
                 // Create message
