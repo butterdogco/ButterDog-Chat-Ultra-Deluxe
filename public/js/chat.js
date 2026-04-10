@@ -119,8 +119,8 @@ function renderConversations() {
                 <div class="user-avatar" style="background-color: ${getColorDataWithHue(previewColor)}">${previewText}</div>
             </div>
             <div class="conversation-details">
-                <div class="conversation-name">${displayName}</div>
-                <div class="conversation-preview">${lastMessageText}</div>
+                <div class="conversation-name">${escapeHtml(displayName)}</div>
+                <div class="conversation-preview">${escapeHtml(lastMessageText)}</div>
             </div>
         `;
         container.addEventListener('click', () => selectConversation(convo._id));
@@ -153,7 +153,8 @@ async function selectConversation(conversationId) {
 
     const isDM = conversation.type === 'dm';
     
-    const groupOnlyButtonStyle = isDM ? 'none' : '';
+    // Only show for groups where the current user is the owner (1st member)
+    const groupOnlyButtonStyle = isDM || (conversation.members[0]._id !== currentUser.id) ? 'none' : '';
     addMemberButton.style.display = groupOnlyButtonStyle;
     editGroupNameButton.style.display = groupOnlyButtonStyle; 
 
@@ -327,27 +328,32 @@ async function createConversation(users) {
 
         const isDM = users.length === 1;
 
-        const response = await fetch('/api/conversations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: isDM ? 'dm' : 'group',
-                memberIds: users.map(u => u._id)
-            })
+        socket.emit('conversation:new', {
+            type: isDM ? 'dm' : 'group',
+            memberIds: users.map(u => u._id)
         });
 
-        const conversation = await response.json();
+        // const response = await fetch('/api/conversations', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({
+        //         type: isDM ? 'dm' : 'group',
+        //         memberIds: users.map(u => u._id)
+        //     })
+        // });
 
-        // Check if this conversation already exists
-        const existingIndex = conversations.findIndex(c => c._id === conversation._id);
-        if (existingIndex === -1) {
-            // New conversation
-            conversations.unshift(conversation);
-            renderConversations();
-        }
+        // const conversation = await response.json();
 
-        // Select the conversation
-        selectConversation(conversation._id);
+        // // Check if this conversation already exists
+        // const existingIndex = conversations.findIndex(c => c._id === conversation._id);
+        // if (existingIndex === -1) {
+        //     // New conversation
+        //     conversations.unshift(conversation);
+        //     renderConversations();
+        // }
+
+        // // Select the conversation
+        // selectConversation(conversation._id);
     } catch (err) {
         console.error('Failed to create conversation:', err);
         displayNotification('Failed to create conversation', 'An error has occurred');
@@ -687,6 +693,16 @@ function setupSocketListeners() {
         updateUserStatus(userId, false);
     });
 
+    socket.on('conversation:join', (newConversation) => {
+        const existingIndex = conversations.findIndex(c => c._id === newConversation._id);
+        if (existingIndex === -1) { // New
+            displayNotification('Notice', 'You have been added to a conversation');
+            conversations.unshift(newConversation);
+        }
+        
+        selectConversation(newConversation._id);
+    });
+
     socket.on('conversation:edit', (newData) => {
         const { newName, newMembers, conversationId } = newData;
 
@@ -920,6 +936,7 @@ function getURLParameter(key) {
  * @param {string} name 
  */
 function shortenName(name) {
+    name = escapeHtml(name);
     if (name.length > 2) {
         const nameParts = name.trim().split(/\s+/); // Seperate by spaces
         return nameParts

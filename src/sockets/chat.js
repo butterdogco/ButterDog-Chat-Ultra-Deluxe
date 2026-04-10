@@ -11,7 +11,7 @@ module.exports = (io) => {
         const userId = session ? session.userId : null;
 
         function isLoggedIn() {
-            return session !== null && session.userId !== null; 
+            return session !== null && session.userId !== null;
         }
 
         // Ensure session and userId exist
@@ -47,9 +47,67 @@ module.exports = (io) => {
                 })
                 .catch(console.error);
         }
-        
+
         // Broadcast user online status
-        socket.broadcast.emit('user:online', { userId: userId });
+        socket.broadcast.emit('user:online', { userId });
+
+        // Handle creating a conversation
+        socket.on('conversation:new', async ({ type, memberIds, name }) => {
+            try {
+                if (!type || !memberIds || !Array.isArray(memberIds)) {
+                    throw new Error('Invalid data');
+                }
+
+                // Add current user to members if not included
+                const allMembers = [... new Set([userId, ...memberIds])];
+                console.log("New convo:", allMembers, type, memberIds, name);
+
+                // For DMs, check if the conversation already exists
+                if (type === 'dm') {
+                    if (allMembers.length !== 2) {
+                        throw new Error('DM must have exactly 2 members');
+                    }
+
+                    // Check for existing DM
+                    const existingDM = await Conversation.findOne({
+                        type: 'dm',
+                        members: { $all: allMembers, $size: 2 }
+                    });
+
+                    if (existingDM) {
+                        await existingDM.populate('members', 'username colorHue online');
+                        socket.emit('conversation:join', existingDM);
+                        return;
+                    }
+                } else {
+                    const existingGroup = await Conversation.findOne({
+                        type: 'group',
+                        members: { $all: allMembers }
+                    });
+
+                    if (existingGroup) {
+                        await existingGroup.populate('members', 'username colorHue online');
+                        socket.emit('conversation:join', existingGroup);
+                        return;
+                    }
+                }
+
+                // Create new conversation
+                const conversation = new Conversation({
+                    type,
+                    members: allMembers,
+                    name: type === 'group' ? name : ''
+                });
+
+                await conversation.save();
+                await conversation.populate('members', 'username colorHue online');
+
+                console.log("new convo")
+                socket.emit('conversation:join', conversation);
+            } catch (err) {
+                socket.emit('error', { message: err.message });
+            }
+        });
 
         // Handle joining a specific conversation
         socket.on('conversation:join', async (conversationId) => {
@@ -57,7 +115,7 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             if (!isValidObjectId(conversationId)) {
                 socket.emit('error', { message: 'Invalid conversation id' });
                 return;
@@ -84,13 +142,14 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             try {
                 const { conversationId, newData } = data;
 
                 // Find the conversation and ensure the user is a member
                 const conversation = await Conversation.findById(conversationId);
                 if (!conversation || !conversation.members.includes(userId)) {
+                    console.log(conversation.members, userId);
                     socket.emit('error', { message: 'Access denied' });
                     return;
                 }
@@ -103,7 +162,7 @@ module.exports = (io) => {
 
                 let editType;
 
-                if (typeof(newData) === 'string') { // New name
+                if (typeof (newData) === 'string') { // New name
                     editType = 'name';
                     const shortenedName = newData.trim().slice(0, 24).trim(); // Limit to 24 characters, trim twice since we may encounter a space after slicing
                     conversation.name = shortenedName;
@@ -111,7 +170,8 @@ module.exports = (io) => {
                     editType = 'members';
 
                     // Check if the user owns the conversation
-                    if (conversation.members[0] !== userId) {
+                    if (conversation.members[0]._id.toString() !== userId) {
+                        console.log(conversation.members[0]._id, userId);
                         socket.emit('error', { message: 'Access denied' });
                         return;
                     }
@@ -151,7 +211,7 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             try {
                 const { conversationId, text } = data;
 
@@ -162,7 +222,7 @@ module.exports = (io) => {
                     return;
                 }
 
-                const maxMessageLength = consants.MESSAGE_MAX_LENGTH;
+                const maxMessageLength = constants.MESSAGE_MAX_LENGTH;
                 let trimmedText = text.trim().replace(/  +/g, ' '); // Trim trailing spaces, and replace duplicate spaces with just one
                 if (trimmedText.length > maxMessageLength) { // Trim if exceeds max length
                     trimmedText = trimmedText.substring(0, maxMessageLength);
@@ -203,13 +263,13 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             try {
                 const { messageId, text } = data;
 
                 // Find the message and ensure it was sent by the user
                 const message = await Message.findById(messageId);
-                if (!message || message.sender._id.toString() !== userId.toString()) {
+                if (!message || message.sender._id.toString() !== userId) {
                     socket.emit('error', { message: 'Access denied' });
                     return;
                 }
@@ -247,7 +307,7 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             try {
                 // Find the message and ensure it was sent by the user
                 const message = await Message.findById(messageId);
@@ -284,7 +344,7 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             // Emit the typing event
             socket.to(`convo_${conversationId}`).emit('user:typing', {
                 username: session.username,
@@ -297,7 +357,7 @@ module.exports = (io) => {
                 socket.emit('error', { message: 'You are not logged in.' });
                 return;
             }
-            
+
             // Emit the stopped typing event
             socket.to(`convo_${conversationId}`).emit('user:stopped-typing', {
                 username: session.username,
