@@ -724,6 +724,10 @@ function setupSocketListeners() {
         displayNotification('Error', message);
         console.error('Recieved socket error:', message);
     });
+
+    socket.on('notice', ({ message }) => {
+        displayNotification('Notice', message);
+    });
 }
 
 // DOM event listeners
