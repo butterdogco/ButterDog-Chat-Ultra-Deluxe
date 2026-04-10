@@ -20,7 +20,14 @@ const setupChatSocket = require('./sockets/chat');
 
 const app = express();
 const serverInstance = http.createServer(app);
-const io = socketIO(serverInstance);
+const io = socketIO(serverInstance, {
+  connectionStateRecovery: {
+    // the backup duration of the sessions and the packets
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    // whether to skip middlewares upon successful recovery
+    skipMiddlewares: true,
+  }   
+});
 
 const mongoURI = process.env.MONGO_URI_LOCAL || process.env.MONGO_URI;
 
