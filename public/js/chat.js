@@ -20,6 +20,7 @@ const APP_NAME = 'ButterDog Chat';
 let currentConversationId = null;
 let conversations = [];
 let messages = [];
+let memberListElements = new Map();
 let typingUsernames = new Set();
 let typingTimeout = null;
 let lastMessageInputText = null;
@@ -68,8 +69,6 @@ async function init() {
     setupModalEventListeners();
     updateUserAvatar();
     toggleMemberList();
-
-    messageInput.setAttribute('maxlength', constants.MESSAGE_MAX_LENGTH);
 
     const activeConversation = getURLParameter('convo');
     if (activeConversation) {
@@ -141,9 +140,6 @@ async function selectConversation(conversationId) {
     // Join socket room
     socket.emit('conversation:join', conversationId);
 
-    // Load messages
-    await loadMessages(conversationId);
-
     // Update UI
     const conversation = getCurrentConversationData();
     if (!conversation) {
@@ -188,6 +184,12 @@ async function selectConversation(conversationId) {
     }
 
     mainContainer.classList.toggle('active-conversation', currentConversationId != null);
+
+    messages = [];
+    renderMessages(); // Clear messages while loading new ones
+
+    // Load messages
+    await loadMessages(conversationId);
 }
 
 // Load messages
@@ -218,13 +220,14 @@ function renderMemberList() {
         }
 
         memberList.innerHTML = '';
+        memberListElements.clear();
 
         members.forEach(user => {
             const div = document.createElement('div');
             div.className = 'user-tile';
 
             const color = getColorDataWithHue(user.colorHue);
-            const statusDot = `<span class="status-dot${user.online ? ' online' : ''}"></span>`;
+            const statusDot = `<span class="status-dot${user.online || user._id === currentUser.id ? ' online' : ''}"></span>`;
 
             div.innerHTML = `
                 <div class="user-avatar" style="background-color: ${color}">
@@ -232,9 +235,11 @@ function renderMemberList() {
                     ${statusDot}
                 </div>
                 <div class="user-info">
-                    <span class="username">${user.username}</span>
+                    <span class="username">${escapeHtml(user.username)}</span>
                 </div>
             `;
+
+            memberListElements.set(user._id, div);
 
             memberList.appendChild(div);
         });
@@ -287,7 +292,7 @@ function renderSearchResults(users) {
                 ${statusDot}
             </div>
             <div class="user-info">
-                <span class="username">${user.username}</span>
+                <span class="username">${escapeHtml(user.username)}</span>
             </div>
             <div class="select-user">
                 <input type="checkbox">
@@ -436,7 +441,7 @@ function appendMessage(msg) {
         ` : ''}
         <div class="message-details">
             ${!isSystemMessage ? `
-            <div class="message-info"><span class="sender">${msg.sender.username}</span> - ${formatTime(msg.createdAt)}${msg.edited ? ' (edited)' : ''}</div>
+            <div class="message-info"><span class="sender">${escapeHtml(msg.sender.username)}</span> - ${formatTime(msg.createdAt)}${msg.edited ? ' (edited)' : ''}</div>
             `: ''}
             <div class="message-text">${escapeHtml(msg.text)}</div>
         </div>
@@ -641,7 +646,7 @@ function setupSocketListeners() {
             scrollToBottom();
         } else {
             const conversation = conversations.find((v => v._id == message.conversation && v.type !== 'dm'));
-            displayNotification(message.sender.username + (conversation ? ' - ' + conversation.name : ''), message.text);
+            displayNotification(escapeHtml(message.sender.username) + (conversation ? ' - ' + conversation.name : ''), message.text);
             if (canSendNotifications) {
                 const notification = new Notification(message.sender.username + (conversation ? ' - ' + conversation.name : ''), { body: message.text });
                 const existingNotifications = conversationNotifications.getOrInsert(message.conversation, []);
@@ -936,7 +941,9 @@ function getURLParameter(key) {
  * @param {string} name 
  */
 function shortenName(name) {
+    // Sanitize
     name = escapeHtml(name);
+
     if (name.length > 2) {
         const nameParts = name.trim().split(/\s+/); // Seperate by spaces
         return nameParts
@@ -988,15 +995,20 @@ function updateTypingIndicator() {
         return;
     }
 
-    const usernames = Array.from(typingUsernames)
+    const usernames = Array.from(typingUsernames).map(name => escapeHtml(name));
     typingIndicator.classList.add('visible');
     typingIndicator.textContent = usernames.join(', ') + ' is typing';
 }
 
 function updateUserStatus(userId, online) {
     // Update UI to show online/offline status
-    loadConversations();
-    renderMemberList();
+    const memberElement = memberListElements.get(userId);
+    if (memberElement) {
+        const statusDot = memberElement.querySelector('.status-dot');
+        if (statusDot) {
+            statusDot.classList.toggle('online', online);
+        }
+    }
 }
 
 function onFormSubmit(e) {

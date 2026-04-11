@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const constants = require('../constants');
 
 const router = express.Router();
 
@@ -14,8 +15,19 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Username and password are required' });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        // Validate password length
+        if (password.length < constants.PASSWORD_MIN_LENGTH || password.length > constants.PASSWORD_MAX_LENGTH) {
+            return res.status(400).json({ error: `Password must be between ${constants.PASSWORD_MIN_LENGTH} and ${constants.PASSWORD_MAX_LENGTH} characters` });
+        }
+
+        // Validate username characters
+        if (!constants.USERNAME_ALLOWED_CHARACTERS.test(username)) {
+            return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and hyphens' });
+        }
+
+        // Validate username length
+        if (username.length < constants.USERNAME_MIN_LENGTH || username.length > constants.USERNAME_MAX_LENGTH) {
+            return res.status(400).json({ error: `Username must be between ${constants.USERNAME_MIN_LENGTH} and ${constants.USERNAME_MAX_LENGTH} characters` });
         }
 
         // Check if user exists
@@ -55,6 +67,26 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+
+        // Validation
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        // Validate password length
+        if (password.length < constants.PASSWORD_MIN_LENGTH || password.length > constants.PASSWORD_MAX_LENGTH) {
+            return res.status(400).json({ error: `Password must be between ${constants.PASSWORD_MIN_LENGTH} and ${constants.PASSWORD_MAX_LENGTH} characters` });
+        }
+
+        // Validate username characters
+        if (!constants.USERNAME_ALLOWED_CHARACTERS.test(username)) {
+            return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, and hyphens' });
+        }
+
+        // Validate username length
+        if (username.length < constants.USERNAME_MIN_LENGTH || username.length > constants.USERNAME_MAX_LENGTH) {
+            return res.status(400).json({ error: `Username must be between ${constants.USERNAME_MIN_LENGTH} and ${constants.USERNAME_MAX_LENGTH} characters` });
+        }
 
         // Find user
         const user = await User.findOne({ username });

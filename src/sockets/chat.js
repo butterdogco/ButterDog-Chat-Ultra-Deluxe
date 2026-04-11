@@ -90,6 +90,15 @@ module.exports = (io) => {
                         socket.emit('conversation:join', existingGroup);
                         return;
                     }
+
+                    // Validate group name
+                    if (!name || typeof name !== 'string' || name.trim().length < constants.CONVERSATION_GROUP_MIN_NAME_LENGTH || name.trim().length > constants.CONVERSATION_GROUP_MAX_NAME_LENGTH) {
+                        throw new Error(`Group name must be between ${constants.CONVERSATION_GROUP_MIN_NAME_LENGTH} and ${constants.CONVERSATION_GROUP_MAX_NAME_LENGTH} characters`);
+                    }
+
+                    if (!constants.CONVERSATION_GROUP_ALLOWED_CHARACTERS.test(name)) {
+                        throw new Error('Group name can only contain letters, numbers, spaces, underscores, and hyphens');
+                    }
                 }
 
                 // Create new conversation

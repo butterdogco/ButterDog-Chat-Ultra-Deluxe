@@ -51,7 +51,7 @@
         <section class="input-container">
             <form class="form" id="input-form">
                 <textarea type="text" placeholder="Enter message" class="message-input text-input" id="message-input"
-                    autocomplete="off"></textarea>
+                    autocomplete="off" maxlength="<%= messageMaxLength %>"></textarea>
                 <button class="message-send text-button" type="button" id="send-button">Send</button>
             </form>
         </section>
@@ -84,10 +84,12 @@
             username: '<%= user.username %>',
             colorHue: '<%= user.colorHue %>'
         };
+        const constants = {
+            MESSAGE_EDIT_WINDOW: <%= messageEditWindow %>
+        };
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="constants"></script>
     <script src="js/chat.js"></script>
     <script src="js/auth.js"></script>
 </body>
