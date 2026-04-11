@@ -111,7 +111,6 @@ module.exports = (io) => {
                 await conversation.save();
                 await conversation.populate('members', 'username colorHue online');
 
-                console.log("new convo")
                 socket.emit('conversation:join', conversation);
             } catch (err) {
                 socket.emit('error', { message: err.message });
