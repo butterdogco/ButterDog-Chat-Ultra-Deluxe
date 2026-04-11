@@ -328,7 +328,7 @@ module.exports = (io) => {
 
                 // Update the message data
                 message.deleted = true;
-                message.text = '[deleted]';
+                message.text = constants.MESSAGE_DELETE_REPLACEMENT;
                 await message.save();
 
                 // Update conversation last message contents if that was the last message
