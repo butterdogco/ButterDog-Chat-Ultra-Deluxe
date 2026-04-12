@@ -91,14 +91,17 @@ module.exports = (io) => {
                         return;
                     }
 
-                    // Validate group name
-                    if (!name || typeof name !== 'string' || name.trim().length < constants.CONVERSATION_GROUP_MIN_NAME_LENGTH || name.trim().length > constants.CONVERSATION_GROUP_MAX_NAME_LENGTH) {
-                        throw new Error(`Group name must be between ${constants.CONVERSATION_GROUP_MIN_NAME_LENGTH} and ${constants.CONVERSATION_GROUP_MAX_NAME_LENGTH} characters`);
+                    if (name && typeof name === 'string') {
+                        // Validate group name
+                        if (name.trim().length < constants.CONVERSATION_GROUP_MIN_NAME_LENGTH || name.trim().length > constants.CONVERSATION_GROUP_MAX_NAME_LENGTH) {
+                            throw new Error(`Group name must be between ${constants.CONVERSATION_GROUP_MIN_NAME_LENGTH} and ${constants.CONVERSATION_GROUP_MAX_NAME_LENGTH} characters`);
+                        }
+    
+                        if (!constants.CONVERSATION_GROUP_ALLOWED_CHARACTERS.test(name)) {
+                            throw new Error('Group name can only contain letters, numbers, spaces, underscores, and hyphens');
+                        }
                     }
 
-                    if (!constants.CONVERSATION_GROUP_ALLOWED_CHARACTERS.test(name)) {
-                        throw new Error('Group name can only contain letters, numbers, spaces, underscores, and hyphens');
-                    }
                 }
 
                 // Create new conversation
@@ -172,7 +175,18 @@ module.exports = (io) => {
 
                 if (typeof (newData) === 'string') { // New name
                     editType = 'name';
-                    const shortenedName = newData.trim().slice(0, 24).trim(); // Limit to 24 characters, trim twice since we may encounter a space after slicing
+                    const shortenedName = newData.trim();
+
+                    if (shortenedName.length < constants.CONVERSATION_GROUP_MIN_NAME_LENGTH || shortenedName.length > constants.CONVERSATION_GROUP_MAX_NAME_LENGTH) {
+                        socket.emit('error', { message: `Group name must be between ${constants.CONVERSATION_GROUP_MIN_NAME_LENGTH} and ${constants.CONVERSATION_GROUP_MAX_NAME_LENGTH} characters` });
+                        return;
+                    }
+
+                    if (!constants.CONVERSATION_GROUP_ALLOWED_CHARACTERS.test(shortenedName)) {
+                        socket.emit('error', { message: 'Group name can only contain letters, numbers, spaces, underscores, and hyphens' });
+                        return;
+                    }
+
                     conversation.name = shortenedName;
                 } else if (newData instanceof Array) { // Modified members
                     editType = 'members';
