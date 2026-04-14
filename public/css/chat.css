@@ -345,6 +345,8 @@ ul {
     background-color: #0000007e;
     width: 100vw;
     height: 100vh;
+    color: inherit;
+    border: none;
     
     &.show {
         display: flex;
