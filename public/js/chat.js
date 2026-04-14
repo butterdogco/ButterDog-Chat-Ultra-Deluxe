@@ -197,8 +197,10 @@ async function loadMessages(conversationId) {
     try {
         const response = await fetch(`/api/conversations/${conversationId}/messages?limit=50`);
         messages = await response.json();
-        renderMessages();
-        scrollToBottom();
+        if (currentConversationId === conversationId) {
+            renderMessages();
+            scrollToBottom();
+        }
     } catch (err) {
         console.error('Failed to load messages:', err);
     }
