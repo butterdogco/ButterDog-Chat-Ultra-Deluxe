@@ -23,8 +23,9 @@
 
 ### MongoDB Atlas (Cloud)
 
-1. Create a database on MongoDB, and note the database URL and secret.
-2. Create a file named `.env` in the root directory of this project, and fill in the template below:
+1. Create a database on MongoDB. Instructions can be found on the [MongoDB Atlas docs](https://www.mongodb.com/docs/atlas/).
+2. After creating and setting up a database, please make sure to note the database URL and secret.
+3. Create a file named `.env` in the root directory of this project, and fill in the template below:
 
 ```env
 MONGO_URI=<database url>
