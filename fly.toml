@@ -1,15 +1,12 @@
-# fly.toml app configuration file generated for butterdog-chat-ultra-deluxe on 2025-01-16T02:18:20Z
+# fly.toml app configuration file generated for bdog-chat-ultra-deluxe-ia on 2026-04-14T21:18:40Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'butterdog-chat-ultra-deluxe'
-primary_region = 'sea'
+app = 'bdog-chat-ultra-deluxe-ia'
+primary_region = 'lax'
 
 [build]
-
-[env]
-  PORT = '3000'
 
 [http_service]
   internal_port = 3000
@@ -20,6 +17,7 @@ primary_region = 'sea'
   processes = ['app']
 
 [[vm]]
-  memory = '512mb'
+  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 256
