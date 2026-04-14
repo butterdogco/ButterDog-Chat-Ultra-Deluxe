@@ -16,7 +16,8 @@
 ## Initial setup
 
 1. Clone this repository: `git clone https://github.com/butterdogco/ButterDog-Chat-Ultra-Deluxe.git`.
-2. Install dependencies: `npm install`.
+2. Navigate to the cloned repository (e.g., `cd ./ButterDog-Chat-Ultra-Deluxe/`, command differs between operating systems)
+3. Install dependencies: `npm install`.
 
 ## Setting up the database
 
@@ -45,4 +46,4 @@ PORT=<web server port, default is 3000>
 ## Running the server
 
 1. Open a terminal in the root directory, then run `npm run start`. This may take a moment.
-2. Visit the website at the URL logged in your terminal. (e.g., [http://localhost:3000](http://localhost:3000))
+2. To visit the website, navigate to the URL logged in the terminal in a web browser. (e.g., [http://localhost:3000](http://localhost:3000))
