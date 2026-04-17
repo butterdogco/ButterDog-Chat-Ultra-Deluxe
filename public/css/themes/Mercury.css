@@ -1,0 +1,74 @@
+/* 
+  Mercury theme officially made for ButterDog Chat Ultra Deluxe
+  > Created by Keegan
+  > A dark theme with thin, white outlines, and deep blue to purple gradients
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+  /* Background */
+  --background-color: #0b0c10;
+  --background: linear-gradient(135deg, #231f33 0%, #0f1118 100%);
+  --background-color-secondary: #1f2833;
+  
+  /* Navigation */
+  --nav-background-color: rgba(20, 20, 20, 0.2);
+
+  /* Page */
+  --page-padding: 12px;
+
+  /* General Colors */
+  --color-red: #e04c4c;
+  --color-blue: #66b8fc;
+
+  /* Text */
+  --text-color-primary: #ffffff;
+  --text-color-secondary: #c5c6c7;
+  --text-color-placeholder: #6c757d;
+  --text-color-link: var(--color-blue);
+  --text-size: 16px;
+  --text-font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  
+  /* Inputs */
+  --text-input-background: #37414d;
+  --text-input-padding: 4px 12px 4px 12px;
+
+  /* Buttons */
+  --button-background: #443579;
+  --button-hover-background: #35285a;
+
+  /* Radius' */
+  --border-radius: 12px;
+  --element-border-radius: 6px;
+
+  --outline-select-color: #8dcdf8ab;
+  --outline-select: 1px solid var(--outline-select-color);
+  --border-seperator-color: #ffffff27;
+  --border-seperator: 1px solid var(--border-seperator-color);
+
+  /* Scrollbar */
+  --scrollbar-background: #1f2833;
+  --scrollbar-thumb: #444c56;
+
+  /* Messages */
+  --message-border-radius: 0;
+  --message-seperator: var(--border-separator, 1px solid #ffffff27);
+  --message-padding: 8px 12px 8px 12px;
+  --message-background: transparent;
+  --message-text-margin: 4px 0 4px 0;
+  --message-hover-background: #2e3446;
+
+  /* Transitions */
+  --transition-common: all 0.15s ease;
+
+  /* Margin and Padding */
+  --container-inner-padding: 12px;
+
+  --item-padding-small: 4px;
+  --item-padding-medium: 8px;
+
+  --item-gap-small: 4px;
+  --item-gap-medium: 6px;
+  --item-gap-large: 12px;
+}

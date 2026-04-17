@@ -7,6 +7,16 @@ main {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    flex-direction: column;
+    gap: var(--item-gap-large);
+
+    .logo {
+        width: 300px;
+        height: 75px; /* Hardcoded to prevent content layout shift */
+        max-width: 80vw;
+        align-self: center;
+        object-fit: contain;
+    }
 
     .container {
         display: flex;
@@ -14,7 +24,7 @@ main {
         gap: 6px;
         align-self: center;
         width: 500px;
-        background-color: var(--background-tertiary-color);
+        background-color: var(--background-color-secondary);
         border-radius: 12px;
         border: var(--border-seperator);
         padding: var(--container-inner-padding);
@@ -29,7 +39,7 @@ main {
             }
 
             a {
-                color: var(--blue-color);
+                color: var(--text-color-link);
             }
         }
 
@@ -39,7 +49,7 @@ main {
             gap: 6px;
 
             .error {
-                color: var(--red-color);
+                color: var(--color-red);
             }
         }
     }

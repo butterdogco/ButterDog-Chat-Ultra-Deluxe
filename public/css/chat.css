@@ -30,7 +30,18 @@
     --member-list-width: 210px;
 }
 
-body.member-list-toggled {
+body.no-active-conversation {
+    .content-container,
+    .input-container {
+        display: none;
+    }
+
+    .no-active-conversation-container {
+        display: block;
+    }
+}
+
+body:not(.no-active-conversation).member-list-toggled {
     .content-container {
         width: calc(100vw - var(--sidebar-width) - var(--member-list-width));
         right: var(--member-list-width);
@@ -63,7 +74,7 @@ ul {
     display: flex;
     flex-direction: column;
     gap: var(--item-gap-medium);
-    background-color: var(--background-tertiary-color);
+    background-color: var(--nav-background-color);
     border-right: var(--border-seperator);
     padding: var(--container-inner-padding);
     height: 100vh;
@@ -93,7 +104,7 @@ ul {
             &:hover,
             &:focus,
             &.active {
-                background-color: var(--secondary-color);
+                background-color: var(--message-hover-background);
             }
 
             .conversation-details {
@@ -148,7 +159,7 @@ ul {
         justify-content: space-between;
         gap: var(--item-gap-large);
         padding: var(--container-inner-padding);
-        background-color: var(--background-tertiary-color);
+        background-color: var(--nav-background-color);
         border-bottom: var(--border-seperator);
 
         h2 {
@@ -200,10 +211,10 @@ ul {
                 flex-direction: column;
 
                 .message-info {
-                    color: var(--text-secondary-color);
+                    color: var(--text-color-secondary);
 
                     .sender {
-                        color: var(--text-primary-color);
+                        color: var(--text-color-primary);
                     }
                 }
             }
@@ -220,7 +231,7 @@ ul {
             }
 
             &:hover {
-                background-color: var(--background-tertiary-color);
+                background-color: var(--message-hover-background);
 
                 .message-actions {
                     opacity: 1;
@@ -234,10 +245,11 @@ ul {
         bottom: 0;
         left: 0;
         width: 100%;
-        background-color: var(--background-tertiary-color);
+        background-color: var(--nav-background-color);
+        border-top: var(--border-seperator);
         margin: 0;
         padding: var(--item-padding-small);
-        color: var(--text-secondary-color);
+        color: var(--text-color-secondary);
         font-style: italic;
         visibility: hidden;
 
@@ -255,7 +267,7 @@ ul {
     width: calc(100vw - var(--sidebar-width));
     height: var(--lower-content-height);
     border-top: var(--border-seperator);
-    background: var(--background-tertiary-color);
+    background: var(--nav-background-color);
     
     .form {
         display: flex;
@@ -293,7 +305,27 @@ ul {
     width: var(--member-list-width);
     height: 100vh;
     border-left: var(--border-seperator);
-    background: var(--background-tertiary-color);
+    background: var(--nav-background-color);
+}
+
+.no-active-conversation-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: calc(100% - var(--sidebar-width));
+    padding: var(--container-inner-padding);
+    text-align: center;
+    gap: var(--item-gap-medium);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transform: translateY(-50%);
+
+    h2,
+    p {
+        margin: 0;
+    }
 }
 
 .notifications {
@@ -342,7 +374,9 @@ ul {
     display: none;
     align-content: center;
     justify-content: center;
-    background-color: #0000007e;
+    background: none;
+    backdrop-filter: blur(4px) brightness(0.75);
+    -webkit-backdrop-filter: blur(4px) brightness(0.75);
     width: 100vw;
     height: 100vh;
     color: inherit;
@@ -359,7 +393,7 @@ ul {
     flex-direction: column;
     gap: var(--item-gap-medium);
     padding: var(--container-inner-padding);
-    background: var(--background-tertiary-color);
+    background: var(--background-color-secondary);
     border: var(--border-seperator);
     border-radius: 12px;
     width: 260px;
@@ -408,7 +442,7 @@ ul {
                 }
 
                 &:hover {
-                    background-color: var(--primary-color);
+                    background-color: var(--message-hover-background);
                 }
             }
         }

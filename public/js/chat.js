@@ -73,6 +73,8 @@ async function init() {
     const activeConversation = getURLParameter('convo');
     if (activeConversation) {
         selectConversation(activeConversation);
+    } else {
+        document.body.classList.add('no-active-conversation');
     }
 }
 
@@ -146,6 +148,8 @@ async function selectConversation(conversationId) {
         console.warn('No conversation data');
         return;
     }
+
+    document.body.classList.remove('no-active-conversation');
 
     const isDM = conversation.type === 'dm';
     

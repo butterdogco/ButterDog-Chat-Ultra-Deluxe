@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('./themes/Mercury.css');
 
-:root {
+/* :root {
     --primary-color: #575788;
     --secondary-color: #474368;
     --tertiary-color: #929ab4;
@@ -28,23 +29,20 @@
     --item-gap-small: 4px;
     --item-gap-medium: 6px;
     --item-gap-large: 12px;
-}
+} */
 
 html,
 body {
-    font-family: var(--font-body);
-    background-color: var(--background-primary-color);
-    color: var(--text-primary-color);
+    font-family: var(--text-font-family);
+    background: var(--background);
+    background-color: var(--background-color);
+    color: var(--text-color-primary);
     margin: 0;
 }
 
 * {
     box-sizing: border-box;
     font-family: inherit;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-header);
 }
 
 hr {
@@ -66,6 +64,9 @@ hr {
     padding: var(--item-padding-small);
     font-size: 16px;
     height: 44px;
+    border-radius: var(--element-border-radius);
+    outline: transparent;
+    transition: var(--transition-common);
 
     .user-avatar {
         flex-shrink: 0;
@@ -83,6 +84,11 @@ hr {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+    }
+
+    &:hover {
+        background-color: var(--button-hover-background);
+        outline: var(--outline-select);
     }
 }
 
@@ -115,31 +121,33 @@ hr {
 
 .text-input {
     padding: var(--item-padding-small);
-    border-radius: 6px;
-    background-color: var(--background-primary-color);
-    color: var(--text-primary-color);
-    font-size: 15px;
+    border-radius: var(--element-border-radius);
+    background-color: var(--text-input-background);
+    outline: transparent;
+    color: inherit;
+    font-size: 16px;
     border: none;
     transition: 0.15s ease;
 
     &:focus {
-        background-color: var(--secondary-color);
+        background-color: var(--text-input-background);
+        outline: var(--outline-select);
     }
 }
 
 .text-button {
     padding: var(--item-padding-small);
-    border-radius: 6px;
-    background-color: var(--primary-color);
-    color: var(--text-primary-color);
-    font-size: 15px;
+    border-radius: var(--element-border-radius);
+    background-color: var(--button-background);
+    color: inherit;
+    font-size: 16px;
     border: none;
     cursor: pointer;
     transition: 0.15s ease;
 
     &:hover,
     &:focus {
-        background-color: var(--secondary-color);
+        background-color: var(--button-hover-background);
     }
 }
 
@@ -159,7 +167,7 @@ hr {
 
     &:hover,
     &:focus {
-        background-color: var(--primary-color);
+        background-color: var(--button-hover-background);
         color: var(--text-primary-color);
         .material-symbols-rounded {
             font-variation-settings: 'FILL' 1;
@@ -173,14 +181,14 @@ hr {
     aspect-ratio: 1/1;
     border: none;
     font-size: 16px;
-    color: var(--text-secondary-color);
+    color: var(--text-color-secondary);
     cursor: pointer;
     background-color: transparent;
     transition: 0.2s ease;
 
     &:hover,
     &:focus {
-        background-color: var(--primary-color);
-        color: var(--text-primary-color);
+        background-color: var(--button-hover-background);
+        color: var(--text-color-primary);
     }
 }
