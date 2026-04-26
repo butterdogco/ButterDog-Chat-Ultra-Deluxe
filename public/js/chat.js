@@ -92,10 +92,6 @@ async function loadConversations() {
 
 // Render conversation list
 function renderConversations() {
-    if (currentConversationId === null) {
-        return;
-    }
-    
     conversationsList.innerHTML = '';
 
     conversations.forEach(convo => {
