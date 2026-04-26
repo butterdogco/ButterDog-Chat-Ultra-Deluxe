@@ -39,6 +39,7 @@ let canSendNotifications = "Notification" in window;
 const mainContainer = document.getElementById('main-container');
 const conversationsList = document.getElementById('conversation-list');
 const memberList = document.getElementById('member-list');
+const returnToConversationsButton = document.getElementById('return-to-conversations-button');
 const messageContainer = document.getElementById('message-container');
 const inputForm = document.getElementById('input-form');
 const messageInput = document.getElementById('message-input');
@@ -56,6 +57,7 @@ const userSelectCloseButton = document.getElementById('user-select-close-button'
 const userSelectSelectedCount = document.getElementById('user-select-selected-count');
 const editGroupNameButton = document.getElementById('edit-group-name-button');
 const toggleMemberListButton = document.getElementById('toggle-member-list-button');
+const closeMemberListButton = document.getElementById('close-member-list-button');
 const addMemberButton = document.getElementById('add-member-button');
 const notificationsContainer = document.getElementById('notifications-container');
 
@@ -90,6 +92,10 @@ async function loadConversations() {
 
 // Render conversation list
 function renderConversations() {
+    if (currentConversationId === null) {
+        return;
+    }
+    
     conversationsList.innerHTML = '';
 
     conversations.forEach(convo => {
@@ -138,6 +144,12 @@ async function selectConversation(conversationId) {
     currentConversationId = conversationId;
     renderConversations();
     renderMemberList();
+
+    if (conversationId === null) {
+        mainContainer.classList.remove('active-conversation');
+        renderMessages();
+        return;
+    }
 
     // Join socket room
     socket.emit('conversation:join', conversationId);
@@ -211,7 +223,7 @@ async function loadMessages(conversationId) {
 }
 
 function renderMemberList() {
-    if (currentConversationId) {
+    if (currentConversationId !== null) {
         let members;
         for (const convo of conversations) {
             if (convo._id === currentConversationId) {
@@ -343,28 +355,6 @@ async function createConversation(users) {
             type: isDM ? 'dm' : 'group',
             memberIds: users.map(u => u._id)
         });
-
-        // const response = await fetch('/api/conversations', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         type: isDM ? 'dm' : 'group',
-        //         memberIds: users.map(u => u._id)
-        //     })
-        // });
-
-        // const conversation = await response.json();
-
-        // // Check if this conversation already exists
-        // const existingIndex = conversations.findIndex(c => c._id === conversation._id);
-        // if (existingIndex === -1) {
-        //     // New conversation
-        //     conversations.unshift(conversation);
-        //     renderConversations();
-        // }
-
-        // // Select the conversation
-        // selectConversation(conversation._id);
     } catch (err) {
         console.error('Failed to create conversation:', err);
         displayNotification('Failed to create conversation', 'An error has occurred');
@@ -413,6 +403,10 @@ function setConversationModalVisible(visible) {
 // Render messages
 function renderMessages() {
     messageContainer.innerHTML = '';
+
+    if (currentConversationId === null) {
+        return;
+    }
 
     messages.forEach(msg => {
         appendMessage(msg);
@@ -783,6 +777,8 @@ function setupEventListeners() {
         }, 1000);
     });
 
+    returnToConversationsButton.addEventListener('click', () => selectConversation(null));
+
     newConversationButton.addEventListener('click', promptNewConversation);
 
     editGroupNameButton.addEventListener('click', editGroupName);
@@ -790,6 +786,7 @@ function setupEventListeners() {
     addMemberButton.addEventListener('click', promptAddMembers);
 
     toggleMemberListButton.addEventListener('click', toggleMemberList);
+    closeMemberListButton.addEventListener('click', toggleMemberList);
 
     document.addEventListener('visibilitychange', onVisibilityChanged);
 }

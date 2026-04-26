@@ -9,7 +9,8 @@
 :root {
   /* Background */
   --background-color: #0b0c10;
-  --background: linear-gradient(135deg, #231f33 0%, #0f1118 100%);
+  --background-image: url("../../img/background-dark.png");
+  --background-gradient: linear-gradient(135deg, #231f33 0%, #0f1118 100%);
   --background-color-secondary: #1f2833;
   
   /* Navigation */

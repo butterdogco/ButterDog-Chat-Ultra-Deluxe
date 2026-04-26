@@ -12,10 +12,11 @@ main {
 
     .logo {
         width: 300px;
+        max-width: 90%;
         height: 75px; /* Hardcoded to prevent content layout shift */
-        max-width: 80vw;
         align-self: center;
         object-fit: contain;
+        object-position: bottom;
     }
 
     .container {
@@ -24,6 +25,7 @@ main {
         gap: 6px;
         align-self: center;
         width: 500px;
+        max-width: 90%;
         background-color: var(--background-color-secondary);
         border-radius: 12px;
         border: var(--border-seperator);

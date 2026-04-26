@@ -67,6 +67,17 @@ ul {
     height: 100vh;
 }
 
+.sidebar {
+    .header,
+    .header-mobile h2 {
+        margin: 0;
+    }
+
+    .header {
+        padding: 3px 0 4px 0; /* To match with content-container */
+    }
+}
+
 .sidebar-container {
     position: absolute;
     top: 0;
@@ -161,6 +172,10 @@ ul {
         padding: var(--container-inner-padding);
         background-color: var(--nav-background-color);
         border-bottom: var(--border-seperator);
+
+        .return-button {
+            display: none;
+        }
 
         h2 {
             margin: 0;
@@ -284,6 +299,7 @@ ul {
             max-height: 400%;
             margin: 0;
             padding: 7.5px;
+            min-width: 0;
 
             &:not(:focus) {
                 max-height: 100%;
@@ -306,6 +322,10 @@ ul {
     height: 100vh;
     border-left: var(--border-seperator);
     background: var(--nav-background-color);
+
+    .header-mobile {
+        display: none;
+    }
 }
 
 .no-active-conversation-container {
@@ -449,3 +469,56 @@ ul {
     }
 }
 
+@media (max-width: 900px) {
+    .content-container,
+    .input-container {
+        width: calc(100vw - var(--sidebar-width)) !important;
+        right: 0 !important;
+    }
+
+    :root {
+        --member-list-width: 100%;
+    }
+
+    .member-list-container {
+        z-index: 2;
+        backdrop-filter: blur(24px) brightness(0.5);
+        -webkit-backdrop-filter: blur(24px) brightness(0.5);
+
+        .header {
+            display: none;
+        }
+
+        .header-mobile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+}
+
+@media (max-width: 650px) {
+    :root {
+        --sidebar-width: 100%;
+    }
+
+    main.active-conversation .sidebar-container {
+        display: none !important;
+    }
+
+    .sidebar-container {
+        z-index: 2;
+        backdrop-filter: blur(24px) brightness(0.5);
+        -webkit-backdrop-filter: blur(24px) brightness(0.5);
+    }
+
+    .content-container,
+    .input-container {
+        width: 100vw !important;
+        right: 0 !important;
+    }
+
+    .content-container .conversation-header .return-button {
+        display: flex !important;
+    }
+}
