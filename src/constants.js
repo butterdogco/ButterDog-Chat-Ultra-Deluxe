@@ -16,6 +16,8 @@ const constants = {
     USERNAME_MAX_LENGTH: 20, // Maximum username length
     PASSWORD_MIN_LENGTH: 8, // Minimum password length
     PASSWORD_MAX_LENGTH: 256, // Maximum password length
+
+    MESSAGES_CACHE_SIZE: 50, // Number of messages to keep in cache per conversation
 };
 
 if (typeof module !== 'undefined' && typeof exports !== 'undefined') {

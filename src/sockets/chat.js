@@ -3,6 +3,7 @@ const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 
 const constants = require('../constants');
+const { addMessageToCache, getMessageFromCache, updateConversationInCache, removeMessageFromCache, addConversationToCache } = require('../cache');
 const { isValidObjectId } = require('mongoose');
 
 module.exports = (io) => {
@@ -96,12 +97,11 @@ module.exports = (io) => {
                         if (name.trim().length < constants.CONVERSATION_GROUP_MIN_NAME_LENGTH || name.trim().length > constants.CONVERSATION_GROUP_MAX_NAME_LENGTH) {
                             throw new Error(`Group name must be between ${constants.CONVERSATION_GROUP_MIN_NAME_LENGTH} and ${constants.CONVERSATION_GROUP_MAX_NAME_LENGTH} characters`);
                         }
-    
+
                         if (!constants.CONVERSATION_GROUP_ALLOWED_CHARACTERS.test(name)) {
                             throw new Error('Group name can only contain letters, numbers, spaces, underscores, and hyphens');
                         }
                     }
-
                 }
 
                 // Create new conversation
@@ -113,6 +113,7 @@ module.exports = (io) => {
 
                 await conversation.save();
                 await conversation.populate('members', 'username colorHue online');
+                addConversationToCache(conversation);
 
                 socket.emit('conversation:join', conversation);
             } catch (err) {
@@ -215,6 +216,7 @@ module.exports = (io) => {
                 }
 
                 await conversation.save();
+                updateConversationInCache(conversation);
 
                 // Broadcast to room
                 io.to(`convo_${conversationId}`).emit('conversation:edit', {
@@ -261,6 +263,9 @@ module.exports = (io) => {
                 await message.save();
                 await message.populate('sender', constants.USER_MESSAGE_PUBLIC_PROPERTIES);
 
+                // Cache the message
+                addMessageToCache(message);
+
                 // Update conversation
                 conversation.lastMessage = {
                     text: message.text,
@@ -270,6 +275,8 @@ module.exports = (io) => {
                 };
                 conversation.updatedAt = new Date();
                 await conversation.save();
+
+                updateConversationInCache(conversation);
 
                 // Broadcast to conversation room
                 io.to(`convo_${conversationId}`).emit('message:new', message);
@@ -289,9 +296,22 @@ module.exports = (io) => {
             try {
                 const { messageId, text } = data;
 
+                // Check cache first
+                let message = getMessageFromCache(messageId);
+                if (!message) {
+                    // If not in cache, fetch from database
+                    message = await Message.findById(messageId);
+                    if (message) {
+                        // Add to cache for future requests
+                        addMessageToCache(message);
+                    } else {
+                        socket.emit('error', { message: 'Message not found' });
+                        return;
+                    }
+                }
+
                 // Find the message and ensure it was sent by the user
-                const message = await Message.findById(messageId);
-                if (!message || message.sender._id.toString() !== userId) {
+                if (message.sender._id.toString() !== userId) {
                     socket.emit('error', { message: 'Access denied' });
                     return;
                 }
@@ -315,6 +335,8 @@ module.exports = (io) => {
                 await message.save();
                 await message.populate('sender', constants.USER_MESSAGE_PUBLIC_PROPERTIES);
 
+                updateMessageInCache(message);
+
                 // Broadcast update
                 io.to(`convo_${message.conversation}`).emit('message:edited', message);
             } catch (err) {
@@ -331,9 +353,19 @@ module.exports = (io) => {
             }
 
             try {
+                let message = getMessageFromCache(messageId);
+                if (!message) {
+                    message = await Message.findById(messageId);
+                    if (message) {
+                        addMessageToCache(message);
+                    } else {
+                        socket.emit('error', { message: 'Message not found' });
+                        return;
+                    }
+                }
+
                 // Find the message and ensure it was sent by the user
-                const message = await Message.findById(messageId);
-                if (!message || message.sender.toString() !== userId.toString()) {
+                if (message.sender.toString() !== userId.toString()) {
                     socket.emit('error', { message: 'Access denied' });
                     return;
                 }
@@ -345,11 +377,22 @@ module.exports = (io) => {
                 message.text = constants.MESSAGE_DELETE_REPLACEMENT;
                 await message.save();
 
+                removeMessageFromCache(messageId);
+
                 // Update conversation last message contents if that was the last message
                 const conversation = await Conversation.findById(message.conversation);
                 if (conversation && conversation.lastMessage.text === originalContents) {
-                    // At some point this could instead fetch the new last message and update accordingly
-                    conversation.lastMessage.text = '[deleted]';
+                    // Fetch the most recent non-deleted message in the conversation
+                    const lastNonDeletedMessage = await Message.findOne({ conversation: conversation._id, deleted: { $ne: true } }).sort({ createdAt: -1 });
+
+                    if (lastNonDeletedMessage) {
+                        conversation.lastMessage = {
+                            text: lastNonDeletedMessage.text,
+                            sender: lastNonDeletedMessage.sender
+                        };
+                    } else {
+                        conversation.lastMessage = null; // No messages left in the conversation
+                    }
                 }
 
                 // Broadcast deletion

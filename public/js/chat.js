@@ -34,6 +34,7 @@ let selectSubmitMode = 'newConvo';
 let selectedUsers = new Set();
 let conversationNotifications = new Map();
 let canSendNotifications = "Notification" in window;
+let isSmallScreen = false; // Updated on init and on window resize
 
 // DOM Elements
 const mainContainer = document.getElementById('main-container');
@@ -70,13 +71,16 @@ async function init() {
     setupEventListeners();
     setupModalEventListeners();
     updateUserAvatar();
-    toggleMemberList();
+    updateIsSmallScreen();
+    if (!isSmallScreen) {
+        toggleMemberList();
+    }
 
     const activeConversation = getURLParameter('convo');
     if (activeConversation) {
         selectConversation(activeConversation);
     } else {
-        document.body.classList.add('no-active-conversation');
+        mainContainer.classList.add('no-active-conversation');
     }
 }
 
@@ -144,6 +148,8 @@ async function selectConversation(conversationId) {
     if (conversationId === null) {
         mainContainer.classList.remove('active-conversation');
         renderMessages();
+        // Remove URL parameter
+        updateURLParameter('convo', null);
         return;
     }
 
@@ -157,7 +163,7 @@ async function selectConversation(conversationId) {
         return;
     }
 
-    document.body.classList.remove('no-active-conversation');
+    mainContainer.classList.remove('no-active-conversation');
 
     const isDM = conversation.type === 'dm';
     
@@ -573,7 +579,7 @@ function editGroupName() {
 }
 
 function toggleMemberList() {
-    document.body.classList.toggle('member-list-toggled');
+    mainContainer.classList.toggle('member-list-toggled');
 }
 
 function updateInputSize() {
@@ -784,6 +790,8 @@ function setupEventListeners() {
     toggleMemberListButton.addEventListener('click', toggleMemberList);
     closeMemberListButton.addEventListener('click', toggleMemberList);
 
+    window.addEventListener('resize', updateIsSmallScreen);
+
     document.addEventListener('visibilitychange', onVisibilityChanged);
 }
 
@@ -924,9 +932,14 @@ function removeUserFromSet(set, removingId) {
 
 function updateURLParameter(key, value) {
     const queryParams = new URLSearchParams(window.location.search);
-    queryParams.set(key, value);
+    if (value === null) {
+        queryParams.delete(key);
+    } else {
+        queryParams.set(key, value);
+    }
 
-    const newURL = window.location.pathname + '?' + queryParams.toString();
+    const queryString = queryParams.toString();
+    const newURL = window.location.pathname + (queryString !== '' ? '?' + queryParams.toString() : '');
     history.replaceState(null, null, newURL);
 }
 
@@ -1008,6 +1021,10 @@ function updateUserStatus(userId, online) {
             statusDot.classList.toggle('online', online);
         }
     }
+}
+
+function updateIsSmallScreen() {
+    isSmallScreen = window.innerWidth < 600;
 }
 
 function onFormSubmit(e) {

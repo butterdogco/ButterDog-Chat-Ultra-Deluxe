@@ -1,0 +1,21 @@
+@import url('./global.css');
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.logo {
+  position: absolute;
+  margin-bottom: 300px;
+  width: 280px;
+  max-width: 90%;
+}
+
+h1 {
+  font-size: 4rem;
+  margin: 0;
+}

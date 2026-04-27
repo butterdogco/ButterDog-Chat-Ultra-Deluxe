@@ -30,7 +30,7 @@
     --member-list-width: 210px;
 }
 
-body.no-active-conversation {
+main.no-active-conversation {
     .content-container,
     .input-container {
         display: none;
@@ -41,7 +41,7 @@ body.no-active-conversation {
     }
 }
 
-body:not(.no-active-conversation).member-list-toggled {
+main:not(.no-active-conversation).member-list-toggled {
     .content-container {
         width: calc(100vw - var(--sidebar-width) - var(--member-list-width));
         right: var(--member-list-width);
@@ -76,6 +76,10 @@ ul {
     .header {
         padding: 3px 0 4px 0; /* To match with content-container */
     }
+    
+    .header-mobile {
+        display: none;
+    }
 }
 
 .sidebar-container {
@@ -90,6 +94,12 @@ ul {
     padding: var(--container-inner-padding);
     height: 100vh;
     width: var(--sidebar-width);
+
+    .header-mobile .logo {
+        max-width: 90%;
+        object-fit: contain;
+        object-position: bottom;
+    }
 
     .conversations {
         display: flex;
@@ -322,10 +332,6 @@ ul {
     height: 100vh;
     border-left: var(--border-seperator);
     background: var(--nav-background-color);
-
-    .header-mobile {
-        display: none;
-    }
 }
 
 .no-active-conversation-container {
@@ -364,7 +370,7 @@ ul {
     justify-content: flex-end;
     gap: var(--item-gap-medium);
     text-align: left;
-    background: var(--primary-color);
+    background: var(--background-color-secondary);
     padding: var(--container-inner-padding);
     border-radius: var(--container-inner-padding);
     min-width: 200px;
@@ -508,10 +514,11 @@ ul {
         display: none !important;
     }
 
-    .sidebar-container {
-        z-index: 2;
-        backdrop-filter: blur(24px) brightness(0.5);
-        -webkit-backdrop-filter: blur(24px) brightness(0.5);
+    main:not(.active-conversation) {
+        .content-container,
+        .input-container {
+            display: none !important;
+        }
     }
 
     .content-container,
@@ -522,5 +529,9 @@ ul {
 
     .content-container .conversation-header .return-button {
         display: flex !important;
+    }
+
+    .no-active-conversation-container {
+        display: none !important;
     }
 }
