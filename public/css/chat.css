@@ -26,7 +26,7 @@
 
 :root {
     --lower-content-height: 60px;
-    --sidebar-width: 250px;
+    --sidebar-width: 280px;
     --member-list-width: 210px;
 }
 
@@ -116,16 +116,21 @@ ul {
             cursor: pointer;
             border-radius: 6px;
             background: transparent;
-            color: inherit;
+            color: var(--text-color-placeholder);
             text-align: left;
             font-size: inherit;
             border: none;
             transition: 0.2s ease;
 
+            .user-avatar {
+                color: var(--text-color-primary);
+            }
+
             &:hover,
             &:focus,
             &.active {
                 background-color: var(--message-hover-background);
+                color: inherit;
             }
 
             .conversation-details {
@@ -161,6 +166,15 @@ ul {
             overflow: hidden;
             max-width: 140px;
             text-wrap: nowrap;
+        }
+
+        .buttons {
+            display: flex;
+            gap: var(--item-gap-medium);
+
+            .icon-button {
+                width: 36px;
+            }
         }
     }
 }
@@ -429,6 +443,13 @@ ul {
     max-height: 90vh;
     max-width: 95vw;
 
+    &.settings-modal-content {
+        width: 400px;
+        max-width: 90vw;
+        height: 400px;
+        max-height: 90vh;
+    }
+
     .modal-header {
         display: flex;
         flex-direction: row;
@@ -439,6 +460,7 @@ ul {
             margin: 0;
             height: min-content;
             align-self: center;
+            font-size: 1.25rem;
         }
     }
 
@@ -472,6 +494,22 @@ ul {
                 &:hover {
                     background-color: var(--message-hover-background);
                 }
+            }
+        }
+
+        .setting {
+            display: flex;
+            flex-direction: column;
+            gap: var(--item-gap-small);
+
+            label {
+                font-weight: bold;
+            }
+
+            .note {
+                margin: 0;
+                font-size: 0.8rem;
+                color: var(--text-color-secondary);
             }
         }
     }

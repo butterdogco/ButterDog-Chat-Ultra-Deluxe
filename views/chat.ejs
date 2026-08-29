@@ -31,8 +31,13 @@
                 <p>
                     <%= user.username %>
                 </p>
-                <button class="icon-button" onclick="logout()" title="Logout"><span
-                        class="material-symbols-rounded">logout</span></button>
+
+                <div class="buttons">
+                    <button class="icon-button" onclick="logout()" title="Logout"><span
+                            class="material-symbols-rounded">logout</span></button>
+                    <button class="icon-button" onclick="toggleSettings()" title="Settings"><span
+                            class="material-symbols-rounded">settings</span></button>
+                </div>
             </div>
         </section>
         <section class="member-list-container sidebar">
@@ -92,6 +97,28 @@
                 <button class="create-button text-button" id="user-select-submit-button"><span
                         id="user-select-submit-button-text">Create Conversation</span> (<span
                         id="user-select-selected-count">0</span> selected)</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="modal" id="settings-modal">
+        <div class="modal-content settings-modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-button" id="settings-close-button">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="setting">
+                    <label for="settings-timezone-select">Timezone</label>
+                    <p class="note">
+                        Affects how timestamps are displayed in the chat. By default, the browser's timezone is used.
+                    </p>
+                    <select id="settings-timezone-select" class="text-input">
+                        <option value="default">Default (Browser)</option>
+                        <!-- Timezones will be populated by chat.js -->
+                    </select>
+                </div>
             </div>
         </div>
     </dialog>

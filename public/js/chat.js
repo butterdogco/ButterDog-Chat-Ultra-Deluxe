@@ -35,6 +35,7 @@ let selectedUsers = new Set();
 let conversationNotifications = new Map();
 let canSendNotifications = "Notification" in window;
 let isSmallScreen = false; // Updated on init and on window resize
+let customTimezone = null;
 
 // DOM Elements
 const mainContainer = document.getElementById('main-container');
@@ -61,9 +62,18 @@ const toggleMemberListButton = document.getElementById('toggle-member-list-butto
 const closeMemberListButton = document.getElementById('close-member-list-button');
 const addMemberButton = document.getElementById('add-member-button');
 const notificationsContainer = document.getElementById('notifications-container');
+const settingsModal = document.getElementById('settings-modal');
+const settingsCloseButton = document.getElementById('settings-close-button');
+const settingsTimezoneSelect = document.getElementById('settings-timezone-select');
 
 // Initialize
 async function init() {
+    // Load custom timezone from localStorage
+    const savedTimezone = localStorage.getItem('customTimezone');
+    if (savedTimezone) {
+        setCustomTimezone(savedTimezone);
+    }
+
     await loadConversations();
     renderConversations();
     renderMemberList();
@@ -582,6 +592,10 @@ function toggleMemberList() {
     mainContainer.classList.toggle('member-list-toggled');
 }
 
+function toggleSettings() {
+    settingsModal.classList.toggle('show');
+}
+
 function updateInputSize() {
     const newlines = messageInput.value.split('\n').length;
     messageInput.style.height = newlines > 1 ? `calc(100% + ${19 * (newlines - 1)}px)` : '';
@@ -870,6 +884,40 @@ function setupModalEventListeners() {
 
     // Close button
     userSelectCloseButton.addEventListener('click', () => setConversationModalVisible(false));
+
+    // Settings modal
+    settingsCloseButton.addEventListener('click', toggleSettings);
+
+    // Close modal on background click
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            toggleSettings();
+        }
+    });
+
+    settingsTimezoneSelect.addEventListener('change', (e) => {
+        const timezone = e.target.value;
+        if (!timezone) return;
+        if (timezone === 'default') {
+            customTimezone = null;
+            localStorage.removeItem('customTimezone');
+            return;
+        }
+
+        setCustomTimezone(timezone);
+    });
+
+    // Populate timezone select with all timezones
+    const timezones = Intl.supportedValuesOf('timeZone');
+    timezones.forEach(tz => {
+        const option = document.createElement('option');
+        option.value = tz;
+        option.textContent = tz;
+        if (tz === customTimezone) {
+            option.selected = true;
+        }
+        settingsTimezoneSelect.appendChild(option);
+    });
 }
 
 function updateUserAvatar() {
@@ -977,10 +1025,29 @@ function formatTime(timestamp) {
     const threeDaysAgo = new Date();
     const withinPast3Days = date.getTime() > threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
     const wasToday = withinPast3Days ? date.toDateString() === new Date(Date.now()).toDateString() : false;
+
+    let options = { hour: 'numeric', minute: 'numeric' };
+    if (customTimezone) {
+        options.timeZone = customTimezone;
+    }
+
     return wasToday
-        ? 'Today ' + date.toLocaleString([], { hour: 'numeric', minute: 'numeric' }) // Today
-        : withinPast3Days ? date.toLocaleString([], { weekday: 'long', hour: 'numeric', minute: 'numeric' }) // Past 3 days
-            : date.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }); // Old
+        ? 'Today ' + date.toLocaleString([], options) // Today
+        : withinPast3Days ? date.toLocaleString([], { weekday: 'long', ...options }) // Past 3 days
+            : date.toLocaleString([], { year: 'numeric', month: 'long', day: 'numeric', ...options }); // Old
+}
+
+function setCustomTimezone(timezone) {
+    try {
+        // Check if valid
+        Intl.DateTimeFormat(undefined, { timeZone: timezone });
+        // Set and save
+        customTimezone = timezone;
+        localStorage.setItem('customTimezone', timezone);
+    } catch (e) {
+        console.error('Invalid timezone:', timezone);
+        return;
+    }
 }
 
 function scrollToBottom() {
