@@ -237,7 +237,7 @@ module.exports = (io) => {
             }
 
             try {
-                const { conversationId, text } = data;
+                const { conversationId, text, attachments } = data;
 
                 // Verify user is a member
                 const conversation = await Conversation.findById(conversationId);
@@ -253,11 +253,27 @@ module.exports = (io) => {
                     socket.emit('notice', { message: `Your message was trimmed due to exceeding the max message length of ${maxMessageLength} characters. If this continues to occur, please update/reload the application.` });
                 }
 
+                // Handle attachments if any
+                if (attachments && Array.isArray(attachments)) {
+                    for (const attachment of attachments) {
+                        if (!attachment.key || !attachment.type) {
+                            socket.emit('error', { message: 'Invalid attachment data' });
+                            return;
+                        }
+                        // Validate attachment type
+                        if (!constants.ALLOWED_ATTACHMENT_TYPES.includes(attachment.type)) {
+                            socket.emit('error', { message: `Attachment type ${attachment.type} is not allowed` });
+                            return;
+                        }
+                    }
+                }
+
                 // Create message
                 const message = new Message({
                     conversation: conversationId,
                     sender: userId,
-                    text: trimmedText
+                    text: trimmedText,
+                    attachments: attachments || []
                 });
 
                 await message.save();

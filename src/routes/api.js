@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const { isValidObjectId } = require("mongoose");
+const { uploadFileToCDN, generatePresignedUrl } = require("../cdn");
 const constants = require("../constants");
 
 const router = express.Router();
@@ -107,6 +108,74 @@ router.get('/conversations/:id/messages', async (req, res) => {
         res.json(messages.reverse()); // Return oldest first for display
     } catch (err) {
         console.error('GET conversations/:id/messages error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+router.post('/uploads/presign', async (req, res) => {
+    try {
+        const { fileName, mimeType } = req.body;
+
+        if (!fileName || !mimeType) {
+            return res.status(400).json({ error: 'Missing fileName or mimeType' });
+        }
+
+        // Validate MIME type
+        if (!constants.ALLOWED_ATTACHMENT_TYPES.includes(mimeType)) {
+            return res.status(400).json({ error: 'Invalid file type' });
+        }
+
+        // Validate file extension matches MIME type
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const mimeExtensionMap = {
+            'image/jpeg': ['jpg', 'jpeg'],
+            'image/png': ['png'],
+            'image/gif': ['gif'],
+            'image/webp': ['webp'],
+            'text/plain': ['txt']
+        };
+
+        if (!mimeExtensionMap[mimeType] || !mimeExtensionMap[mimeType].includes(fileExtension)) {
+            return res.status(400).json({ error: 'File extension does not match MIME type' });
+        }
+
+        // Validate file size
+        if (req.body.fileSize && req.body.fileSize > constants.MAX_ATTACHMENT_SIZE) {
+            return res.status(400).json({ error: 'File size exceeds the maximum allowed size' });
+        }
+
+        // Generate a unique key for the file
+        const key = `uploads/${Date.now()}_${fileName}.${fileExtension}`;
+
+        // Generate a presigned URL for the upload
+        const presignedUrl = await generatePresignedUrl(key, mimeType);
+
+        res.json({ presignedUrl, key });
+    } catch (err) {
+        console.error('POST uploads/presign error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+/**
+ * POST /api/profile/update -> Updates the user's profile (username, colorHue, profilePicture)
+ * Request body can include any of the following:
+ * {
+ *   username: "newUsername", // optional
+ *   colorHue: 120, // optional, number between 0-360
+ *   profilePicture: "https://cdn.example.com/path/to/picture.jpg" // optional, must be a valid URL or null to remove
+ * }
+ * 
+ * Returns { success: true } on success, or { error: "message" } on failure.
+ */
+router.post('/profile/update', async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { username, colorHue, profilePicture } = req.body;
+
+        
+    } catch (err) {
+        console.error('Profile update error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
