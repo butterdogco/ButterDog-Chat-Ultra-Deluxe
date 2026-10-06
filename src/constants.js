@@ -17,6 +17,11 @@ const constants = {
     PASSWORD_MIN_LENGTH: 8, // Minimum password length
     PASSWORD_MAX_LENGTH: 256, // Maximum password length
 
+    ALLOWED_ATTACHMENT_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'text/plain'], // Allowed attachment MIME types
+    ALLOWED_PROFILE_PICTURE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], // Allowed profile picture MIME types
+    MAX_ATTACHMENT_SIZE: 5 * 1024 * 1024, // 5 MB in bytes
+    MAX_PROFILE_PICTURE_SIZE: 2 * 1024 * 1024, // 2 MB in bytes
+
     MESSAGES_CACHE_SIZE: 50, // Number of messages to keep in cache per conversation
 };
 
