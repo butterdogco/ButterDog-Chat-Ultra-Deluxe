@@ -77,6 +77,51 @@
             <h2>No active conversation</h2>
             <p>Select a conversation from the left or <button class="text-button"
                     onclick="promptNewConversation()">start a new one</button>.</p>
+            <button class="text-button" id="test-button">Test</button>
+            <script>
+                const api = 'http://localhost:3008/api/profile/update';
+                document.getElementById('test-button').addEventListener('click', async () => {
+                    const filePicker = document.createElement('input');
+                    filePicker.setAttribute('type', 'file');
+                    filePicker.setAttribute('accept', 'image/*');
+                    filePicker.addEventListener('change', async () => {
+                        if (filePicker.files.length > 0) {
+                            const file = filePicker.files[0];
+                            const reader = new FileReader();
+                            
+                            await new Promise((resolve, reject) => {
+                                reader.onload = () => resolve();
+                                reader.onerror = () => reject(reader.error);
+                                reader.readAsDataURL(file);
+                            });
+
+                            const base64Encoded = reader.result.split(',')[1]; // Get the base64 part of the data URL
+                            
+                            fetch(api, {
+                                method: 'POST',
+                                body: JSON.stringify({ profilePicture: base64Encoded }),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }).then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        console.log('Profile picture updated successfully');
+                                    } else {
+                                        console.error('Failed to update profile picture:', data.error);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error updating profile picture:', error);
+                                });
+                        } else {
+                            console.warn('No file input');
+                        }
+                        filePicker.remove();
+                    });
+                    filePicker.click();
+                });
+            </script>
         </section>
     </main>
 
