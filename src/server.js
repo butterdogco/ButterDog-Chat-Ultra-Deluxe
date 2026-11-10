@@ -54,7 +54,7 @@ async function startServer() {
             client: mongoose.connection.getClient(),
             collectionName: 'session'
         }),
-        cookie: { secure: false } // set to true with https
+        cookie: { secure: process.env.NODE_ENV === 'production' } // set to true with https
     });
     app.use(sessionMiddleware);
     
