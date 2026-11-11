@@ -4,6 +4,7 @@ const PORT = process.env.PORT || 3000;
 
 const express = require('express');
 const session = require('express-session')
+const csrf = require('lusca').csrf;
 const MongoStore = require('connect-mongo').default;
 const http = require('http');
 const socketIO = require('socket.io');
@@ -57,6 +58,7 @@ async function startServer() {
         cookie: { secure: false } // set to true with https
     });
     app.use(sessionMiddleware);
+    app.use(csrf());
     
     // Share session with socket.io
     io.use((socket, next) => {
