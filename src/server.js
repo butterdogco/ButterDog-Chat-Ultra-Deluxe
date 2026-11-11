@@ -10,6 +10,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const mongoose = require('mongoose');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -18,7 +19,6 @@ const apiRoutes = require('./routes/api');
 
 // Socket handlers
 const setupChatSocket = require('./sockets/chat');
-
 const app = express();
 const serverInstance = http.createServer(app);
 const io = socketIO(serverInstance, {
@@ -28,6 +28,10 @@ const io = socketIO(serverInstance, {
     // whether to skip middlewares upon successful recovery
     skipMiddlewares: true,
   }   
+});
+const limiter = rateLimit({
+    windowMs: 3 * 60 * 1000, // remember requests for 3 minutes
+    max: 100, // max 100 requests per windowMs
 });
 
 const mongoURI = process.env.MONGO_URI_LOCAL || process.env.MONGO_URI;
