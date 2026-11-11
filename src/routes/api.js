@@ -71,7 +71,7 @@ router.get('/conversations/:id/messages', async (req, res) => {
         const before = req.query.before; // timestamp or messageId
 
         // Verify if the conversation id is valid
-        if (conversationId === undefined || !isValidObjectId(conversationId)) {
+        if (conversationId === null || typeof(conversationId) !== 'string' || !isValidObjectId(conversationId)) {
             return res.status(400).json({ error: 'Missing or invalid conversation id' });
         }
 
@@ -87,11 +87,19 @@ router.get('/conversations/:id/messages', async (req, res) => {
             deleted: false
         };
 
-        if (before) {
+        if (before !== null) {
+            if (typeof(before) !== 'string') {
+                return res.status(400).json({ error: 'Invalid type for before parameter'})
+            }
+
             // If before is an ISO date, use it; otherwise treat as a messageId
             if (before.match(/^\d{4}-\d{2}-\d{2}/)) {
                 query.createdAt = { $lt: new Date(before) };
             } else {
+                if (!isValidObjectId(before)) {
+                    return res.status(400).json({ error: 'Invalid messageId for before parameter' });
+                }
+
                 const beforeMsg = await Message.findById(before);
                 if (beforeMsg) {
                     query.createdAt = { $lt: beforeMsg.createdAt };

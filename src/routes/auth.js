@@ -11,8 +11,8 @@ router.post('/signup', async (req, res) => {
         const { username, password } = req.body;
 
         // Validation
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password are required' });
+        if (!username || typeof(username) !== 'string' || !password || typeof(password) !== 'string') {
+            return res.status(400).json({ error: 'Missing or invalid username and password' });
         }
 
         // Validate password length
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Validation
-        if (!username || !password) {
+        if (!username || typeof(username) !== 'string' || !password || typeof(password) !== 'string') {
             return res.status(400).json({ error: 'Username and password are required' });
         }
 
