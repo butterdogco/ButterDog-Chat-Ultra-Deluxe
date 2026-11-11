@@ -23,7 +23,7 @@ router.get('/users/search', async (req, res) => {
         const query = req.query.q;
         const currentUserId = req.session.userId;
 
-        if (!query || query.length < 2) {
+        if (!query || typeof(query) !== 'string' || query.length < 2) {
             return res.json([]);
         }
 
