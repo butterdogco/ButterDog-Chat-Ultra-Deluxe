@@ -19,6 +19,7 @@ const apiRoutes = require('./routes/api');
 // Socket handlers
 const setupChatSocket = require('./sockets/chat');
 const app = express();
+app.set('trust proxy', 1 /* number of proxies between user and server */);
 const serverInstance = http.createServer(app);
 const io = socketIO(serverInstance, {
   connectionStateRecovery: {
