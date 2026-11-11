@@ -14,7 +14,6 @@
  */
 
 const socket = io();
-const APP_NAME = 'ButterDog Chat';
 
 // State
 let currentConversationId = null;
@@ -98,6 +97,10 @@ async function init() {
 async function loadConversations() {
     try {
         const response = await fetch('/api/conversations');
+        if (!response.ok) {
+            displayNotification('Failed to load converstions', `Server returned: ${response.statusText}. Please try again later.`, 5000);
+            return;
+        }
         conversations = await response.json();
     } catch (err) {
         console.error('Failed to load conversations:', err);
@@ -189,7 +192,7 @@ async function selectConversation(conversationId) {
 
         const conversationName = isDM ? otherUser.username : conversation.name || 'Group Chat';
         conversationTitle.textContent = conversationName;
-        document.title = conversationName + ' - '  + APP_NAME;
+        document.title = conversationName + ' - '  + constants.APP_NAME;
         updateURLParameter('convo', conversationId);
 
         // Clear notifications
@@ -201,7 +204,7 @@ async function selectConversation(conversationId) {
             conversationNotifications.delete(conversationId);
         }
     } else {
-        document.title = APP_NAME;
+        document.title = constants.APP_NAME;
         updateURLParameter('convo', null);
     }
 
@@ -221,13 +224,36 @@ async function selectConversation(conversationId) {
 }
 
 // Load messages
-async function loadMessages(conversationId) {
+async function loadMessages(conversationId, fromOldest) {
     try {
-        const response = await fetch(`/api/conversations/${conversationId}/messages?limit=50`);
-        messages = await response.json();
+        const apiUrl = new URL(`/api/conversations/${conversationId}/messages`, location.href);
+        apiUrl.searchParams.set('limit', constants.CONVERSATION_MESSAGE_LOAD_LIMIT);
+
+        if (fromOldest && messages.length >= constants.CONVERSATION_MESSAGE_LOAD_LIMIT) {
+            const oldestMessage = messages[0];
+            apiUrl.searchParams.set('before', oldestMessage._id);
+        } else fromOldest = false;
+
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            displayNotification('Failed to load messages', `Server returned: ${response.statusText}. Please try again later.`, 5000);
+            return;
+        }
+
+        const responseData = await response.json();
+        if (!responseData || responseData.length === 0) {
+            return;
+        }
+        
+        if (fromOldest) {
+            const oldLength = messages.length;
+            fromOldest = messages.unshift(...responseData) - oldLength;
+        } else
+            messages = responseData;
+
         if (currentConversationId === conversationId) {
-            renderMessages();
-            scrollToBottom();
+            renderMessages(fromOldest);
+            if (!fromOldest) scrollToBottom();
         }
     } catch (err) {
         console.error('Failed to load messages:', err);
@@ -290,6 +316,10 @@ async function searchUsers(query) {
 
     try {
         const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            displayNotification('Failed to search users', `Server returned: ${response.statusText}. Please try again later.`, 5000);
+            return;
+        }
         const users = await response.json();
         renderSearchResults(users);
     } catch (err) {
@@ -413,20 +443,24 @@ function setConversationModalVisible(visible) {
 }
 
 // Render messages
-function renderMessages() {
-    messageContainer.innerHTML = '';
+function renderMessages(fromOldest) {
+    let before;
+    if (fromOldest)
+        before = messageContainer.firstChild;
+    else
+        messageContainer.innerHTML = '';
 
     if (currentConversationId === null) {
         return;
     }
 
-    messages.forEach(msg => {
-        appendMessage(msg);
+    (fromOldest ? messages.slice(0, fromOldest) : messages).forEach(msg => {
+        appendMessage(msg, before);
     });
 }
 
 // Append a single message
-function appendMessage(msg) {
+function appendMessage(msg, before) {
     const div = document.createElement('div');
     div.className = 'message';
     div.setAttribute("data-id", msg._id);
@@ -479,7 +513,10 @@ function appendMessage(msg) {
         deleteMessage(messageId);
     });
 
-    messageContainer.appendChild(div);
+    if (before)
+        before.insertAdjacentElement('beforebegin', div);
+    else
+        messageContainer.appendChild(div);
 }
 
 // Send message
@@ -730,7 +767,7 @@ function setupSocketListeners() {
         if (newName) {
             if (conversationId === currentConversationId) {
                 conversationTitle.textContent = newName;
-                document.title = newName + ' - ' + APP_NAME;
+                document.title = newName + ' - ' + constants.APP_NAME;
             }
 
             for (let convo of conversations) {
@@ -791,6 +828,30 @@ function setupEventListeners() {
         typingTimeout = setTimeout(() => {
             socket.emit('typing:stop', currentConversationId);
         }, 1000);
+    });
+
+    let scrollDebounce = false;
+    messageContainer.addEventListener('scrollend', async () => {
+        if (scrollDebounce) return;
+
+        const scrollTop = messageContainer.scrollTop;
+        if (scrollTop < 50 && currentConversationId) {
+            scrollDebounce = true;
+            try {
+                const previousScrollHeight = messageContainer.scrollHeight;
+                const scrollBottom = previousScrollHeight - scrollTop;
+                await loadMessages(currentConversationId, true);
+
+                const newScrollHeight = messageContainer.scrollHeight;
+                if (newScrollHeight === previousScrollHeight) return;
+                messageContainer.scroll({
+                    top: newScrollHeight - scrollBottom,
+                    behavior: 'instant'
+                });
+            } finally {
+                scrollDebounce = false
+            }
+        }
     });
 
     returnToConversationsButton.addEventListener('click', () => selectConversation(null));

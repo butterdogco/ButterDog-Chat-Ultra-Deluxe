@@ -87,9 +87,9 @@ router.get('/conversations/:id/messages', async (req, res) => {
             deleted: false
         };
 
-        if (before !== null) {
+        if (before) {
             if (typeof(before) !== 'string') {
-                return res.status(400).json({ error: 'Invalid type for before parameter'})
+                return res.status(400).json({ error: 'Invalid type for before parameter' });
             }
 
             // If before is an ISO date, use it; otherwise treat as a messageId

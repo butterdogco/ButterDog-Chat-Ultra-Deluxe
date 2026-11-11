@@ -11,6 +11,14 @@ function setError(text, visible) {
     errorDiv.classList.toggle('show', visible);
 }
 
+async function sendApiRequest(endpoint, body) {
+    return fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+}
+
 async function login(event) {
     event.preventDefault();
 
@@ -18,12 +26,7 @@ async function login(event) {
     const password = passwordInput.value;
 
     try {
-        const response = await fetch('/auth/login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ username, password })
-        });
-
+        const response = await sendApiRequest('/auth/login', { username, password });
         const data = await response.json();
 
         if (response.ok) {
@@ -32,7 +35,8 @@ async function login(event) {
             setError(data.error || 'Login failed', true);
         }
     } catch (err) {
-        setError('Network error', true);
+        setError('Network error: ' + err, true);
+        console.error('Error during login:', err);
     }
 }
 
@@ -49,11 +53,7 @@ async function signup(event) {
     }
 
     try {
-        const response = await fetch('/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const response = await sendApiRequest('/auth/signup', { username, password });
 
         const data = await response.json();
 
@@ -63,7 +63,7 @@ async function signup(event) {
             setError(data.error || 'Signup failed', true);
         }
     } catch (err) {
-        setError('Network error', true);
+        setError('Network error: ' + err, true);
         console.error("Error during signup:", err);
     }
 }

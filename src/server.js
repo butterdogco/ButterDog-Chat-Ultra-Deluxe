@@ -4,7 +4,6 @@ const PORT = process.env.PORT || 3000;
 
 const express = require('express');
 const session = require('express-session')
-const csrf = require('lusca').csrf;
 const MongoStore = require('connect-mongo').default;
 const http = require('http');
 const socketIO = require('socket.io');
@@ -30,8 +29,8 @@ const io = socketIO(serverInstance, {
   }   
 });
 const limiter = rateLimit({
-    windowMs: 3 * 60 * 1000, // remember requests for 3 minutes
-    max: 100, // max 100 requests per windowMs
+    windowMs: 0.5 * 60 * 1000, // remember requests for 30 seconds
+    max: 50, // max 50 requests per windowMs
 });
 
 const mongoURI = process.env.MONGO_URI_LOCAL || process.env.MONGO_URI;
@@ -63,7 +62,6 @@ async function startServer() {
     });
     app.use(sessionMiddleware);
 
-    app.use(csrf());
     app.use(limiter);
 
     // Share session with socket.io
